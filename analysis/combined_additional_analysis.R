@@ -55,7 +55,7 @@ all_trials$half<-floor((all_trials$trial-1)/half)
             
 
 # Define other dfs needed later ####
-dynamicTrials<-all_trials[all_trials$condition=="dynamic",]
+dynamicTrials<-all_trials[all_trials$condition=="dynamic",] # dynamic only
 dynamicSecondHalf<-dynamicTrials[dynamicTrials$trial>40,]
 
 # Define variables for plotting labels etc ####
@@ -68,16 +68,16 @@ names(group.labs)<- c("adult","child")
 cond.labs2 <- c("Dynamic", "Static")
 names(cond.labs2) <- c("dynamic", "static")
 
-######################################
+#------------------------------------#
 # visualisation of "best" choices ####
-#####################################
+#------------------------------------#
 
 # for both static and dynamic conditions
-propHalfAll<-aggregate(data = all_trials, best~half+subjID+group+condition, FUN = "mean")
+prop_best_all <-aggregate(data = all_trials, best~half+subjID+group+condition, FUN = "mean")
 
 # Proportion of "best" choices
 ggplot(
-  propHalfAll,
+  prop_best_all,
   aes(x = group, y = best, fill=group)
 ) +
   geom_boxplot(alpha=.5) +
@@ -90,10 +90,10 @@ ggplot(
 
 # Plot frequency of people who chose best option in dynamic, trials 41-80
 
-propHalf<-aggregate(data = dynamicTrials, best~half+subjID+group, FUN = "mean") # dynamic only, both halves
-propHalf$half<-as.factor(propHalf$half)
+prop_best_dyn<-aggregate(data = dynamicTrials, best~half+subjID+group, FUN = "mean") # dynamic only, both halves
+prop_best_dyn$half<-as.factor(prop_best_dyn$half)
 
-tmp <- subset(propHalf, half == 1) # data for dynamic, trials 41-80
+tmp <- subset(prop_best_dyn, half == 1) # data for dynamic, trials 41-80
 
 ## density plot of frequencies at all values of prop best
 ggplot(tmp, 
@@ -113,12 +113,10 @@ tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
 ## now count how many adults vs kids in each bin
 tabyl(tmp, group, prop_best_lvl)
 
-# descriptives of best choice
+# manuscript plot figure: Proporion of time choosing the best monster,
+# both static and dynamic, broken down by halves of experiment
 
-aggregate(data = all_trials, best~half+group+condition, FUN = "mean")
-
-# manuscript plot figure
-plt<- ggplot(data= propHalfAll, aes(x=half, y = best, fill=group, group=group))+
+plt<- ggplot(data= prop_best_all, aes(x=half, y = best, fill=group, group=group))+
   geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = .85, color="black", alpha=.5)+
   scale_fill_manual(values = c("#396AB1","#ed9523"), name = "", labels = c("Adults", "Children"))+
   theme_bw()+
@@ -141,16 +139,49 @@ plt<- ggplot(data= propHalfAll, aes(x=half, y = best, fill=group, group=group))+
 
 plt
 
-#ggsave("propBest.png", width = 13.15, height = 5.46)
+# ggsave(here("plots", "propBest.png"), width = 13.15, height = 5.46)
 
+# descriptives of prop best choice
+aggregate(data = prop_best_all, best~group+condition+half, FUN = "mean")
 
-aggregate(propHalfAll$best~propHalfAll$group+propHalfAll$condition+propHalfAll$half, FUN="mean") #get percents
+#-----------------------------------------------------#
+# visualisation of switching choices, by trial bin ####
+#-----------------------------------------------------#
 
-##########################################################################################
+switchByBin<-aggregate(data = all_trials, switch~bin+subjID+group+condition, FUN = "mean",na.rm=TRUE)
+
+# manuscript plot figure
+plt<-ggplot(data = switchByBin, aes(x = bin, y = switch, group=bin, fill =group))+
+  #geom_line(aes(group=subjID), size=.74,color="black", alpha=.1)+
+  #geom_dotplot(binaxis='y', stackdir='centerwhole',dotsize=.7)+
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
+  # facet_grid(~condition, labeller=labeller(condition=cond.labs2))+
+  facet_grid(condition~group, labeller=labeller(condition=cond.labs2, group = group.labs))+
+  #geom_jitter(width = .1, alpha = .2)+
+  scale_fill_manual(values = c("#396AB1","#ed9523"))+
+  theme_bw()+
+  xlab("Trial")+
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = c(0, 1, 2, 3),
+                     labels = c("Trials 1-20", "Trials 21-40", "Trials 41-60", "Trials 61-80"))+ 
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
+  theme(axis.text.y = element_text(face="bold", size=18), strip.text.x = element_text(size = 28),
+        strip.text.y = element_text(size = 28),
+        axis.title.y = element_text(size = 28, angle = 90),
+        axis.title.x = element_text(size = 28),
+        axis.text.x = element_text(size=24))+
+  ylab("Proporion of switch choices")+
+  ylim(0,1)
+
+plt
+
+# ggsave(here("plots", "propSwitchTrials_bybin.png"), width = 18.3, height = 5.46)
+
+#---------------------------------------------------------------------------------------##
 # visualisation of "explore" (non-max) choices as conditionalised on change discovery ####
-##########################################################################################
+#---------------------------------------------------------------------------------------##
 
-tmp <- subset(all_trials, condition == "dynamic") # dynamic condition only since that's condition where change happens
+dynamicTrials  # dynamic condition data only, since that's condition where change happens
 
 tmp <- tmp %>%
   dplyr::select(c(subjID, group, status, trial, explore)) %>% 
@@ -312,19 +343,19 @@ model<-glm(dynamicTrials$best~dynamicTrials$group*dynamicTrials$half)
 model<-glm(dynamicSecondHalf$best~dynamicSecondHalf$group+dynamicSecondHalf$trial)
 
 
-model<-lm(propHalf$best~propHalf$group*propHalf$half)
+model<-lm(prop_best_dyn$best~prop_best_dyn$group*prop_best_dyn$half)
 summary(model)
-model<-lm(propHalfAll$best~propHalfAll$group*propHalfAll$half*propHalfAll$condition)
+model<-lm(prop_best_all$best~prop_best_all$group*prop_best_all$half*prop_best_all$condition)
 
 
-lmBF(data=propHalf, best~group*half)
-lmBF(data=propHalf, best~group*half+group+half)
+lmBF(data=prop_best_dyn, best~group*half)
+lmBF(data=prop_best_dyn, best~group*half+group+half)
 
 ## T-tetsts to compare 
-dy1<-propHalfAll[propHalfAll$condition=="dynamic"&propHalfAll$half==0,]
-dy2<-propHalfAll[propHalfAll$condition=="dynamic"&propHalfAll$half==1,]
-st1<-propHalfAll[propHalfAll$condition=="static"&propHalfAll$half==0,]
-st2<-propHalfAll[propHalfAll$condition=="static"&propHalfAll$half==1,]
+dy1<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==0,]
+dy2<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==1,]
+st1<-prop_best_all[prop_best_all$condition=="static"&prop_best_all$half==0,]
+st2<-prop_best_all[prop_best_all$condition=="static"&prop_best_all$half==1,]
 
 dy1BF<-ttestBF(data=dy1,formula = best~group)
 dy1Chains= posterior(ttestBF(formula = best ~ group, data = dy1),iterations=1000)

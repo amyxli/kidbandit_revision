@@ -1,7 +1,5 @@
 #Kidbandit Descriptives and Analysis Script
-#Date: 08/28/2020
-#Last edited by ESS 
-#Added in a script to scrape the post-test performance on each of the individual monsters
+## Last edited: 19/10/21 AXL for revision
 
 ## This script does higher level cleaning and summarizing of data from the first replication
 ## adult and child participants. It outputs a summary file containing descriptives of
@@ -23,6 +21,7 @@ tmp <- a %>%
 tmp <- c %>% 
   select(c(subjID, gender)) %>%
   unique()
+
 #########################################################################################
 ##                                  Switch trials                                      ## 
 #########################################################################################

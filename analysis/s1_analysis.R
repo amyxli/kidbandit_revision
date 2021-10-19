@@ -9,7 +9,8 @@ library(ggplot2)
 library(ggpubr)
 library(here)
 library(effsize)
-data_sum <- read_csv(here("data_tidy", "bandit-data_sum-clean.csv"))      
+
+data_sum <- read_csv(here("data_tidy", "study1_data_sum.csv"))      
 age_info<-read_csv(here("data_tidy","study1_ageinfo.csv"))
 data_sum<-merge(data_sum,age_info, by.x="subjID")
 
@@ -493,8 +494,8 @@ plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
   )
 
 plt
-earn1<-plt
-#ggsave("exp1_Stars.png", width = 9.15, height = 5.46)
+
+# ggsave(here("plots", "exp1_Stars.png"), width = 9.15, height = 5.46)
 
 
 
@@ -519,7 +520,7 @@ plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
 
 
 plt
-explore1<-plt
+
 #ggsave("exp1_Explore.png", width = 9.15, height = 5.46)
 
 
@@ -542,8 +543,8 @@ plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
         axis.text.x = element_text(size=24)
   )
 plt
-switch1<-plt
-#ggsave("exp1_Switch.png", width = 9.15, height = 5.46)
+
+# ggsave("exp1_Switch.png", width = 9.15, height = 5.46)
 
 plt<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
   stat_summary(fun.y=mean, geom="bar",alpha=.6, colour="black") +

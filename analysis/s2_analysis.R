@@ -10,7 +10,7 @@ library(ggpubr)
 library(here)
 library(effsize)
 
-data_sum <- read_csv(here("data_tidy", "bandit-rep-data_sum-clean.csv"))      
+data_sum <- read_csv(here("data_tidy", "study2_data_sum.csv"))      
 age_info<-read_csv(here("data_tidy","study2_ageinfo.csv"))
 data_sum<-merge(data_sum,age_info, by.x="subjID")
 
@@ -495,12 +495,8 @@ plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
 
 
 plt
-earn2<-plt
-#ggsave("exp2_Stars.png", width = 9.15, height = 5.46)
-#ggsave("exp2_Stars_FULL.png", width = 9.15, height = 5.46)
 
-
-
+# ggsave(here("plots","exp2_Stars.png"), width = 9.15, height = 5.46)
 
 #### EXPLORE CHOICES ####
 plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
@@ -523,11 +519,7 @@ plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
 
 
 plt
-explore2<-plt
-
-#ggsave("exp2_Explore.png", width = 9.15, height = 5.46)
-#ggsave("exp2_Explore_FULL.png", width = 9.15, height = 5.46)
-
+# ggsave(here("plots","exp2_Explore.png"), width = 9.15, height = 5.46)
 
 ### SWITCH CHOICES ###
 plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
@@ -547,8 +539,7 @@ plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
         axis.title.x = element_text(size = 28),
         axis.text.x = element_text(size=24))
 plt
-switch2<-plt
-#ggsave("exp2_Switch.png", width = 9.15, height = 5.46)
+# ggsave(here("plots","exp2_Switch.png"), width = 9.15, height = 5.46)
 #ggsave("exp2_Switch_FULL.png", width = 9.15, height = 5.46)
 
 

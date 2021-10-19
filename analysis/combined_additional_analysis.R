@@ -17,7 +17,7 @@ library(janitor)
 
 # Load in data, add any variables ####
 
-study1 <- read_csv(here("data_tidy","study1_trialsInfo.csv"))      
+study1 <- read_csv(here("data_tidy","study1_trialsInfo.csv")) # data has switch/non-max choice variables      
 study2 <- read_csv(here("data_tidy","study2_trialsInfo.csv"))      
 
 study1 <- study1 %>% 
@@ -58,11 +58,6 @@ all_trials$half<-floor((all_trials$trial-1)/half)
 dynamicTrials<-all_trials[all_trials$condition=="dynamic",]
 dynamicSecondHalf<-dynamicTrials[dynamicTrials$trial>40,]
 
-propHalf<-aggregate(data = dynamicTrials, best~half+subjID+group+study, FUN = "mean")
-propHalfAll<-aggregate(data = all_trials, best~half+subjID+group+study+condition, FUN = "mean")
-
-propHalf$half<-as.factor(propHalf$half)
-
 # Define variables for plotting labels etc ####
 
 cond.labs <- c("Dynamic version", "Static version")
@@ -77,44 +72,41 @@ names(cond.labs2) <- c("dynamic", "static")
 # visualisation of "best" choices ####
 #####################################
 
-prop_best_info <- all_trials %>%
-  dplyr::select(c(subjID,condition,group,trial,earnedThis, best, half)) %>% 
-  arrange(subjID) %>%
-  distinct %>%
-  group_by(subjID, half) %>%
-  add_tally (best == 1) %>%
-  filter(trial==40 | trial == 80) %>%
-  mutate(prop_best=(n/40)) %>%
-  dplyr::select(c(subjID,condition,group,half,n, prop_best))
+# for both static and dynamic conditions
+propHalfAll<-aggregate(data = all_trials, best~half+subjID+group+condition, FUN = "mean")
 
 # Proportion of "best" choices
 ggplot(
-  prop_best_info,
-  aes(x = group, y = prop_best, fill=group)
+  propHalfAll,
+  aes(x = group, y = best, fill=group)
 ) +
   geom_boxplot(alpha=.5) +
   theme_bw() +
   scale_fill_colorblind() +
-  ylab("prop_best") + 
+  ylab("prop best choices") + 
   xlab("Group") +
   theme(legend.position="none") +
   facet_wrap(~condition+half)
 
-# plot frequency of people who chose best option in dynamic, trials 41-80
-tmp <- prop_best_info %>% filter(condition == "dynamic" & half == 1)
+# Plot frequency of people who chose best option in dynamic, trials 41-80
 
-## density plot of frequencies at all values of prop_best
-ggplot(tmp,
-       aes(x=prop_best, colour=group)) +
+propHalf<-aggregate(data = dynamicTrials, best~half+subjID+group, FUN = "mean") # dynamic only, both halves
+propHalf$half<-as.factor(propHalf$half)
+
+tmp <- subset(propHalf, half == 1) # data for dynamic, trials 41-80
+
+## density plot of frequencies at all values of prop best
+ggplot(tmp, 
+       aes(x=best, colour=group)) +
   geom_density() 
 
 ## however not possible to report count statistics since prop_best is continuous
 ## so divide prop_best into 4 levels (prop_best_lvl)
 
-tmp <- tmp %>% mutate(prop_best_lvl = ifelse(prop_best <= 0.2, 1,
-                                             ifelse(prop_best > 0.2 & prop_best <= 0.4, 2,
-                                                    ifelse(prop_best > 0.4 & prop_best <= 0.6, 3,
-                                                           ifelse(prop_best > 0.6 & prop_best <= 0.8, 4,
+tmp <- tmp %>% mutate(prop_best_lvl = ifelse(best <= 0.2, 1,
+                                             ifelse(best > 0.2 & best <= 0.4, 2,
+                                                    ifelse(best > 0.4 & best <= 0.6, 3,
+                                                           ifelse(best > 0.6 & best <= 0.8, 4,
                                                                   5)))))
 tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
 
@@ -123,28 +115,7 @@ tabyl(tmp, group, prop_best_lvl)
 
 # descriptives of best choice
 
-tmp <- prop_best_info %>% filter(condition == "dynamic")
-
-## first half, dynamic only
-
-subset(tmp, tmp$half == 0 & group == "adult")$prop_best %>% mean() # adults only, 1st half
-subset(tmp, tmp$half == 0 & group == "child")$prop_best %>% mean() # children only, 1st half
-
-## second half, dynamic
-
-subset(tmp, tmp$half == 1 & group == "adult")$prop_best %>% mean() # adults only, 2nd half
-subset(tmp, tmp$half == 1 & group == "child")$prop_best %>% mean() # children only, 2nd half
-
-tmp <- prop_best_info %>% filter(condition == "static")
-## first half, static only
-
-subset(tmp, tmp$half == 0 & group == "adult")$prop_best %>% mean() # adults only, 1st half
-subset(tmp, tmp$half == 0 & group == "child")$prop_best %>% mean() # children only, 1st half
-
-## second half, static
-
-subset(tmp, tmp$half == 1 & group == "adult")$prop_best %>% mean() # adults only, 2nd half
-subset(tmp, tmp$half == 1 & group == "child")$prop_best %>% mean() # children only, 2nd half
+aggregate(data = all_trials, best~half+group+condition, FUN = "mean")
 
 # manuscript plot figure
 plt<- ggplot(data= propHalfAll, aes(x=half, y = best, fill=group, group=group))+

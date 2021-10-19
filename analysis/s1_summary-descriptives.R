@@ -277,9 +277,7 @@ tmp <- rbind(c_DiscoveryAll, a_DiscoveryAll) %>%
 trialsInfo <- left_join(trialsInfo, tmp) 
 
 # Write dataframe that has explore(non-max), switch, status, and time discovered data
-
 # write.csv(trialsInfo, here("data_tidy","study1_trialsInfo.csv"), row.names = FALSE)  
-
 
 #######################################################################################
 ####                           Putting it together                                 #### 

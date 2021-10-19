@@ -298,10 +298,6 @@ adult_sum <- left_join(adult_sum, a_explore)
 adult_sum <- left_join(adult_sum, a_DiscoveryAll)
 
 data_sum<-rbind(child_sum,adult_sum)
-# write.csv(data_sum,
-#           "bandit-data_sum-clean.csv",
-#           row.names=FALSE)
-
 
 #######################################################################################
 ##                                Basic descriptives plots                           ## 
@@ -378,10 +374,8 @@ totalEarn<-rbind(c_totalEarn,a_totalEarn)                                     #C
 
 data_sum <- left_join(data_sum, totalEarn) %>% rename(totalEarn = earnedThis)
 
-# data_sum$totalEarn<-totalEarn$earnedThis                                      #Add this to data sum -- this was mismatched
-
 # write.csv(data_sum,
-#           here("data_tidy","bandit-data_sum-clean.csv"),
+#           here("data_tidy","study1_data_sum.csv"),
 #           row.names=FALSE)
 
 #a_age<-aggregate(data = a, age~subjID+gender+country, mean)

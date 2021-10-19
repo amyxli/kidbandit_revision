@@ -374,14 +374,11 @@ a_totalEarn$group<-"adult"
 totalEarn<-rbind(c_totalEarn,a_totalEarn)                                     #Combine both
 
 data_sum <- left_join(data_sum, totalEarn) %>% rename(totalEarn = earnedThis)
-# data_sum$totalEarn<-totalEarn$earnedThis                                      #Add this to data sum -- this was mismatched
 
+data_sum <-as.data.frame(data_sum)
 
-data_sum_rep<-as.data.frame(data_sum)
+# write.csv(data_sum, here("data_tidy", "study2_data_sum.csv"), row.names = FALSE)
 
-# write.csv(data_sum_rep, here("data_tidy", "bandit-rep-data_sum-clean.csv"), row.names = FALSE)
-
-# data_sum<-read.csv("bandit-rep-data_sum-clean.csv")
 #######################################################################################
 ##                                Basic descriptives plots                           ## 
 #######################################################################################
@@ -497,15 +494,4 @@ plt<-ggplot(data = binnedReward, aes(x = bin, y = choice))+
   geom_bar(position="dodge", stat="summary",fun.y = "mean")+ facet_grid(condition~group)
 
 plt
-
-#
-a <- read_csv(here("data_tidy", "bandit-rep-data_sum-clean.csv"))
-b <- read_csv(here("data_tidy", "archive_revision", "bandit-rep-data_sum-clean.csv"))
-
-a <- a %>% dplyr::select(-c(correct_1, correct_2, correct_3, correct_6))
-
-a <- a %>% arrange(subjID)
-b <- b %>% arrange(subjID)
-
-tmp <- (a == b)
 

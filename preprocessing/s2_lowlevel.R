@@ -59,12 +59,12 @@ c <- c %>%
   arrange(subjID)
 
 #write.csv(a,
-#          "bandit-adult-rep-lowlevel.csv",
+#          here("data_tidy","bandit-adult-rep-lowlevel.csv"),
 #          row.names=FALSE,
 #          na = "")
 
 #write.csv(c,
-#          "bandit-child-rep-lowlevel.csv",
+#          here("data_tidy","bandit-child-rep-lowlevel.csv"),
 #          row.names=FALSE,
 #          na = "")
  

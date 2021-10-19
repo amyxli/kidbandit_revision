@@ -491,12 +491,12 @@ plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
   theme(strip.text.x = element_text(size = 28),
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24))
-
+        axis.text.x = element_text(size=24),
+        axis.text.y = element_text(size=24))
 
 plt
 
-# ggsave(here("plots","exp2_Stars.png"), width = 9.15, height = 5.46)
+# ggsave(here("plots","exp2_Stars.png"), width = 9.15, height = 5.66)
 
 #### EXPLORE CHOICES ####
 plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
@@ -514,12 +514,13 @@ plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
   theme(strip.text.x = element_text(size = 28),
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24))+
+        axis.text.x = element_text(size=24),
+        axis.text.y = element_text(size=24))+
   ylim(0,1)
 
 
 plt
-# ggsave(here("plots","exp2_Explore.png"), width = 9.15, height = 5.46)
+# ggsave(here("plots","exp2_Explore.png"), width = 9.15, height = 5.66)
 
 ### SWITCH CHOICES ###
 plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
@@ -537,9 +538,10 @@ plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
   theme(strip.text.x = element_text(size = 28),
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24))
+        axis.text.x = element_text(size=24),
+        axis.text.y = element_text(size=24))
 plt
-# ggsave(here("plots","exp2_Switch.png"), width = 9.15, height = 5.46)
+# ggsave(here("plots","exp2_Switch.png"), width = 9.15, height = 5.66)
 #ggsave("exp2_Switch_FULL.png", width = 9.15, height = 5.46)
 
 

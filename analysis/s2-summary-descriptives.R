@@ -15,6 +15,14 @@ library(here)
 c <- read_csv(here("data_tidy","bandit-child-study2-lowlevel.csv"))      
 a <- read_csv(here("data_tidy","bandit-adult-study2-lowlevel.csv"))     
 
+# basic demographics ####
+tmp <- a %>%
+  select(c(subjID, gender)) %>%
+  unique()
+
+tmp <- c %>% 
+  select(c(subjID, gender)) %>%
+  unique()
 #########################################################################################
 ##                                  Switch trials                                      ## 
 #########################################################################################

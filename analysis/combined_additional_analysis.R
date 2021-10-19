@@ -13,7 +13,7 @@ library(ggplot2)
 library(here)
 library(BayesFactor)
 library(janitor)
-
+library(effsize)
 
 # Load in data, add any variables ####
 
@@ -68,6 +68,8 @@ names(group.labs)<- c("adult","child")
 cond.labs2 <- c("Dynamic", "Static")
 names(cond.labs2) <- c("dynamic", "static")
 
+status.labs <- c("Not discovered", "Discovered")
+names(status.labs) <- c(0, 1)
 #------------------------------------#
 # visualisation of "best" choices ####
 #------------------------------------#
@@ -144,6 +146,68 @@ plt
 # descriptives of prop best choice
 aggregate(data = prop_best_all, best~group+condition+half, FUN = "mean")
 
+# analysis of best choices, adults vs. children broken down by half ####
+
+## t-tests to compare age groups
+dy1<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==0,]
+dy2<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==1,]
+st1<-prop_best_all[prop_best_all$condition=="static"&prop_best_all$half==0,]
+st2<-prop_best_all[prop_best_all$condition=="static"&prop_best_all$half==1,]
+
+# dynamic, trials 1-40, t-test adult vs child in prop best 
+dy1BF<-ttestBF(data=dy1,formula = best~group)
+dy1Chains= posterior(ttestBF(formula = best ~ group, data = dy1),iterations=1000)
+mean(dy1Chains[,2]) # mean difference 0.4340019
+quantile(dy1Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3654670 0.5013863 
+mean(dy1Chains[,4])# effect size estimite 2.480047
+quantile(dy1Chains[,4],probs=c(0.025,0.975)) # effect size  CI 1.997307 3.007777 
+cohen.d(formula = best ~ group, data = dy1) #regular cohen's d 2.518311
+
+t.test(best~group, data=dy1)
+#t = 12.718, df = 85.83, p-value < 2.2e-16
+#95 percent confidence interval: 0.3684283 0.5049510
+
+# dynamic, trials 40-80, t-test adult vs child in prop best 
+dy2BF<-ttestBF(data=dy2, formula = best~group)
+dy2Chains= posterior(ttestBF(formula = best ~ group, data = dy2),iterations=1000)
+mean(dy2Chains[,2]) # mean difference -0.08148977
+quantile(dy2Chains[,2],probs=c(0.025,0.975)) # mean difference CI -0.156260544 -0.005062601 
+mean(dy2Chains[,4])# effect size estimite -0.4159093
+quantile(dy2Chains[,4],probs=c(0.025,0.975)) # effect size  CI -0.78719831 -0.02623713
+cohen.d(formula = best ~ group, data = dy2) #regular cohen's d  -0.4547433
+
+t.test(best~group, data=dy2)
+# t = -2.4407, df = 95.261, p-value = 0.01651  95% CI  -0.1618265 -0.0166563
+
+# static, trials 1-40
+st1BF<-ttestBF(data=st1, formula = best~group)
+st1Chains= posterior(ttestBF(formula = best ~ group, data = st1),iterations=1000)
+mean(st1Chains[,2]) # mean difference 0.4050065
+quantile(st1Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3362364 0.4767578  
+mean(st1Chains[,4])# effect size estimite 2.573828
+quantile(st1Chains[,4],probs=c(0.025,0.975)) # effect size  CI 2.009807 3.201157 
+cohen.d(formula = best ~ group, data = st1) #regular cohen's d  2.624509 
+
+t.test(best~group, data=st1)
+#t = 7.9796, df = 26.411, p-value = 1.657e-08
+#95% CI 0.850000 0.440625 
+
+# static, trials 40-80
+st2BF<-ttestBF(data=st2, formula = best~group)
+st2Chains= posterior(ttestBF(formula = best ~ group, data = st2),iterations=1000)
+mean(st2Chains[,2]) # mean difference 0.4546788
+quantile(st2Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3730642 0.5333622 
+mean(st2Chains[,4])# effect size estimite 2.732036
+quantile(st2Chains[,4],probs=c(0.025,0.975)) # effect size  CI 2.149687 3.316281 
+cohen.d(formula = best ~ group, data = st2) #regular cohen's d  2.781302
+
+
+dy1BF #[1] Alt., r=0.707 : 2.957546e+20 ±0%
+dy2BF #[1] Alt., r=0.707 : 2.365633 ±0%
+st1BF #[1] Alt., r=0.707 : 2.854948e+16 ±0%
+st2BF #[1] Alt., r=0.707 : 7.850566e+17 ±0%
+
+
 #-----------------------------------------------------#
 # visualisation of switching choices, by trial bin ####
 #-----------------------------------------------------#
@@ -177,13 +241,13 @@ plt
 
 # ggsave(here("plots", "propSwitchTrials_bybin.png"), width = 18.3, height = 5.46)
 
-#---------------------------------------------------------------------------------------##
-# visualisation of "explore" (non-max) choices as conditionalised on change discovery ####
-#---------------------------------------------------------------------------------------##
+#-----------------------------------------------------------------------------------------##
+# visualisation of exploration (non-max + switch as conditionalised on change discovery ####
+#-----------------------------------------------------------------------------------------##
 
 dynamicTrials  # dynamic condition data only, since that's condition where change happens
 
-tmp <- tmp %>%
+tmp <- dynamicTrials %>%
   dplyr::select(c(subjID, group, status, trial, explore)) %>% 
   arrange(subjID) %>%
   mutate(half=ifelse(trial<41,"trial 1-40","trial 41-80")) %>%
@@ -202,6 +266,53 @@ ggplot(
   xlab("Half") +
   theme(legend.position="none") +
   facet_grid(status~group)
+
+# non-maximising (explore) choices, grouped by status (did they discover 8-star?) and age group
+nonMax_StatusBin<-aggregate(data = dynamicTrials, explore~bin+subjID+group+status, FUN = "mean",na.rm=TRUE)
+
+ggplot(data = nonMax_StatusBin, aes(x = bin, y = explore, group=bin, fill =group))+
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
+  facet_grid(status~group, labeller=labeller(status=status.labs, group = group.labs))+
+  scale_fill_manual(values = c("#396AB1","#ed9523"))+
+  theme_bw()+
+  xlab("Trial")+
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = c(0, 1, 2, 3),
+                     labels = c("1-20", "21-40", "41-60", "61-80"))+ 
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
+  theme(axis.text.y = element_text(face="bold", size=18), strip.text.x = element_text(size = 28),
+        strip.text.y = element_text(size = 28),
+        axis.title.y = element_text(size = 28, angle = 90),
+        axis.title.x = element_text(size = 28),
+        axis.text.x = element_text(size=24))+
+  ylab("Proporion of non-maximizing choices")+
+  ylim(0,1)
+
+plt
+
+# ggsave(here("plots", "propNonMax_byStatusBin.png"), width = 14.3, height = 7.46)
+
+switch_StatusBin<-aggregate(data = dynamicTrials, switch~bin+subjID+group+status, FUN = "mean",na.rm=TRUE)
+
+ggplot(data = switch_StatusBin, aes(x = bin, y = switch, group=bin, fill =group))+
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
+  facet_grid(status~group, labeller=labeller(status=status.labs, group = group.labs))+
+  scale_fill_manual(values = c("#396AB1","#ed9523"))+
+  theme_bw()+
+  xlab("Trial")+
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = c(0, 1, 2, 3),
+                     labels = c("1-20", "21-40", "41-60", "61-80"))+ 
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
+  theme(axis.text.y = element_text(face="bold", size=18), strip.text.x = element_text(size = 28),
+        strip.text.y = element_text(size = 28),
+        axis.title.y = element_text(size = 28, angle = 90),
+        axis.title.x = element_text(size = 28),
+        axis.text.x = element_text(size=24))+
+  ylab("Proporion of switching choices")+
+  ylim(0,1)
+
+# ggsave(here("plots", "switch_byStatusBin.png"), width = 14.3, height = 7.46)
 
 ##################################################################################################
 
@@ -350,58 +461,6 @@ model<-lm(prop_best_all$best~prop_best_all$group*prop_best_all$half*prop_best_al
 
 lmBF(data=prop_best_dyn, best~group*half)
 lmBF(data=prop_best_dyn, best~group*half+group+half)
-
-## T-tetsts to compare 
-dy1<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==0,]
-dy2<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==1,]
-st1<-prop_best_all[prop_best_all$condition=="static"&prop_best_all$half==0,]
-st2<-prop_best_all[prop_best_all$condition=="static"&prop_best_all$half==1,]
-
-dy1BF<-ttestBF(data=dy1,formula = best~group)
-dy1Chains= posterior(ttestBF(formula = best ~ group, data = dy1),iterations=1000)
-mean(dy1Chains[,2]) # mean difference 0.4070531
-quantile(dy1Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3260756 0.4852745
-mean(dy1Chains[,4])# effect size estimite 2.050025
-quantile(dy1Chains[,4],probs=c(0.025,0.975)) # effect size  CI 1.575224 2.546720 
-cohen.d(formula = best ~ group, data = dy1) #regular cohen's d 2.083907 
-
-
-dy2BF<-ttestBF(data=dy2, formula = best~group)
-dy2Chains= posterior(ttestBF(formula = best ~ group, data = dy2),iterations=1000)
-mean(dy2Chains[,2]) # mean difference -0.1423074
-quantile(dy2Chains[,2],probs=c(0.025,0.975)) # mean difference CI -0.19920299 -0.08445589 
-mean(dy2Chains[,4])# effect size estimite -0.9365979
-quantile(dy2Chains[,4],probs=c(0.025,0.975)) # effect size  CI -1.3411924 -0.5245647 
-cohen.d(formula = best ~ group, data = dy2) #regular cohen's d  -0.9793778 
-
-
-
-
-st1BF<-ttestBF(data=st1, formula = best~group)
-st1Chains= posterior(ttestBF(formula = best ~ group, data = st1),iterations=1000)
-mean(st1Chains[,2]) # mean difference 0.4449034
-quantile(st1Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3685996 0.5190715 
-mean(st1Chains[,4])# effect size estimite 2.805344
-quantile(st1Chains[,4],probs=c(0.025,0.975)) # effect size  CI 2.192346 3.400605
-cohen.d(formula = best ~ group, data = st1) #regular cohen's d  2.877231 
-
-
-
-
-st2BF<-ttestBF(data=st2, formula = best~group)
-st2Chains= posterior(ttestBF(formula = best ~ group, data = st2),iterations=1000)
-mean(st2Chains[,2]) # mean difference 0.4138434
-quantile(st2Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3391911 0.4929328 
-mean(st2Chains[,4])# effect size estimite 2.491782
-quantile(st2Chains[,4],probs=c(0.025,0.975)) # effect size  CI 1.930437 3.022049 
-cohen.d(formula = best ~ group, data = st2) #regular cohen's d  2.521786
-
-
-
-dy1BF #[1] Alt., r=0.707 : 4.01179e+15 ±0%
-dy2BF #[1] Alt., r=0.707 : 8807.573 ±0%
-st1BF #5.891429e+18 ±0%
-st2BF #Alt., r=0.707 : 3.22587e+15 ±0%
 
 ###################
 ###Switch data#####

@@ -68,8 +68,6 @@ cohen.d(formula = explore ~ group, data = data_sum) #regular cohen's d
 
 ################################ Stars Won ################################
 
-plot(totalEarn ~ group, data = data_sum, main = "Children win fewer stars than adults")
-
 data_sum %>% filter(group == "adult") %>% summarise(mean(totalEarn))
 data_sum %>% filter(group == "child") %>% summarise(mean(totalEarn))
 
@@ -119,7 +117,6 @@ contingencyTableBF(dynamic,sampleType = "poisson")
 # in favor of a relationship between age group and answers to this question
 
 ###      Overall      ####
-
 
 # mean prop overall correct in posttest
 aggregate(data = data_sum, correct~ condition + group, FUN = "mean") #* reported: paper*#
@@ -194,19 +191,8 @@ theme_custom <- theme(strip.text.x = element_text(size = 28),
                       axis.text.y = element_text(size=24)
                       )
 
-plt<-ggplot(data_sum, aes(x=switch, y=totalEarn,color=group,shape=condition))+
-  scale_color_manual(values = c("#cb77ff", "#4fc9bb"))+
-  theme_bw()+
-  geom_point(size=4, alpha=.6) +
-  #  geom_jitter()+
-  ylim(200,500)
-
-
-plt
-
-
 ##### EARNINGS ######
-plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
+earn1<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
   geom_dotplot(binaxis='y', stackdir='center', dotsize=.7, alpha=.3)+
   geom_boxplot(alpha=.5)+
   theme_bw()+
@@ -220,12 +206,12 @@ plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
   scale_x_discrete(labels = c("Adults", "Children"))+
   theme_custom
 
-plt
+earn1
 
 # ggsave(here("plots", "exp1_Stars.png"), width = 9.15, height = 5.46)
 
 #### EXPLORE CHOICES ####
-plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
+explore1<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
   #geom_jitter(size = 3, alpha = 0.3, width = 0.15, aes(fill=group)) +
   geom_dotplot(binaxis='y', stackdir='center', dotsize=.7, alpha=.3)+
   geom_boxplot(alpha=.5)+
@@ -240,13 +226,13 @@ plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
   theme_custom
 
 
-plt
+explore1
 
 # ggsave(here("plots", "exp1_Explore.png"), width = 9.15, height = 5.66)
 
 
 ### SWITCH CHOICES ###
-plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
+switch1<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
   geom_dotplot(binaxis='y', stackdir='center', dotsize=.8, alpha=.3)+
   scale_x_discrete(labels = c("Adults", "Children"))+
   #geom_jitter(size = 3, alpha = 0.3, width = 0.15) +
@@ -260,11 +246,11 @@ plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
   facet_grid(~condition, labeller=labeller(condition = labels))+
   theme_custom
 
-plt
+switch1
 
 # ggsave(here("plots", "exp1_Switch.png"), width = 9.15, height = 5.66)
 
-plt<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
+eight1<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
   stat_summary(fun.y=mean, geom="bar",alpha=.6, colour="black") +
   theme_bw() +
   # stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1)) +
@@ -277,6 +263,6 @@ plt<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
   theme_custom +
   ylim(0,1)
 
-plt
+eight1
 
 # ggsave(here("plots", "exp1_8Star.png"), width = 9.15, height = 5.66)

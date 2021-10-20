@@ -383,12 +383,12 @@ ggcoxzph(cox.zph(discovery.cox.1)) # Assumptions obeyed.
 
 ########### Exploratory correlations  #################
 # 1) Is there a negative relationship between exploration and number of stars won?
-cor.test(data_sum$explore,data_sum$totalEarn)          #For Explore, -0.6139454 
-correlationBF(data_sum$explore,data_sum$totalEarn)     # Alt., r=0.333 : 2.56535e+15 ±0%
+cor.test(data_sum$explore,data_sum$totalEarn)          #For Explore, -0.9486147 
+correlationBF(data_sum$explore,data_sum$totalEarn)     # Alt., r=0.333 : 5.896661e+77 ±0%
 
 
-cor.test(data_sum$switch,data_sum$totalEarn)           #For Switch,   -0.610618 
-correlationBF(data_sum$switch,data_sum$totalEarn)      #[1] Alt., r=0.333 : 1.536948e+15
+cor.test(data_sum$switch,data_sum$totalEarn)           #For Switch,   -0.9360975 
+correlationBF(data_sum$switch,data_sum$totalEarn)      #[1] Alt., r=0.333 : 3.600709e+70 ±0%
 
 
 # 2) Is there a positive relationship between exploration & post-test questions?

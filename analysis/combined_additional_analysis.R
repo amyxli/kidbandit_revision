@@ -70,6 +70,7 @@ names(cond.labs2) <- c("dynamic", "static")
 
 status.labs <- c("Not discovered", "Discovered")
 names(status.labs) <- c(0, 1)
+
 #------------------------------------#
 # visualisation of "best" choices ####
 #------------------------------------#
@@ -143,10 +144,14 @@ plt
 
 # ggsave(here("plots", "propBest.png"), width = 13.15, height = 5.46)
 
+#-------------------------------------#
+# analysis of prop. "best" choices ####
+#-------------------------------------#
+
 # descriptives of prop best choice
 aggregate(data = prop_best_all, best~group+condition+half, FUN = "mean")
 
-# analysis of best choices, adults vs. children broken down by half ####
+# analysis of best choices, adults vs. children broken down by 1st and 2nd half ####
 
 ## t-tests to compare age groups
 dy1<-prop_best_all[prop_best_all$condition=="dynamic"&prop_best_all$half==0,]
@@ -240,6 +245,15 @@ plt<-ggplot(data = switchByBin, aes(x = bin, y = switch, group=bin, fill =group)
 plt
 
 # ggsave(here("plots", "propSwitchTrials_bybin.png"), width = 18.3, height = 5.46)
+
+#-------------------------------#
+## Switching Bin analysis    ####
+#-------------------------------#
+kidsSwitch<- switchByBin %>% filter(group == "child")
+adultSwitch<- switchByBin %>% filter(group == "adult")
+
+lmBF(data=kidsSwitch, switch~bin) #bin : 0.5873183 ±0%
+lmBF(data=adultSwitch, switch~bin) #1.810572e+23 ±0.01%
 
 #-----------------------------------------------------------------------------------------##
 # visualisation of exploration (non-max + switch as conditionalised on change discovery ####
@@ -660,11 +674,3 @@ ggplot(data = combinedPost_long,
   facet_grid(group~condition) +
   labs(x = "Question")
 
-############################
-## Switching Bin analysis ##
-############################
-kidsSwitch<- switchByBin %>% filter(group == "child")
-adultSwitch<- switchByBin %>% filter(group == "adult")
-
-lmBF(data=kidsSwitch, switch~bin)
-lmBF(data=adultSwitch, switch~bin)

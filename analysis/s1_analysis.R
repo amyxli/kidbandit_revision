@@ -154,7 +154,6 @@ ttestBF(subset(dataChild, condition=="static")$correct, mu=.2) # data constant s
 ##################################
 dataDynamic$group<-as.factor(dataDynamic$group)
 
-
 groupBF<-lmBF(correct_8~group, dataDynamic) #* reported: paper*# group : 100.4961 ±0%
 switchBF<-lmBF(correct_8~switch, dataDynamic)  # switch: 1705.60
 exploreBF<-lmBF(correct_8~explore, dataDynamic) # explore: 1233.116 ±0%

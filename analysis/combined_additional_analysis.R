@@ -117,7 +117,7 @@ tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
 ## now count how many adults vs kids in each bin
 tabyl(tmp, group, prop_best_lvl)
 
-# manuscript plot figure: Proporion of time choosing the best monster,
+# manuscript plot figure 2I: proportion of time choosing the best monster,
 # both static and dynamic, broken down by halves of experiment
 
 plt<- ggplot(data= prop_best_all, aes(x=as.factor(half), y = best, fill=group, group=group))+
@@ -218,7 +218,7 @@ st2BF #[1] Alt., r=0.707 : 7.850566e+17 ±0%
 
 switchByBin<-aggregate(data = all_trials, switch~bin+subjID+group+condition, FUN = "mean",na.rm=TRUE)
 
-# manuscript plot figure
+# manuscript plot figure 2J
 plt<-ggplot(data = switchByBin, aes(x = bin, y = switch, group=bin, fill =group))+
   #geom_line(aes(group=subjID), size=.74,color="black", alpha=.1)+
   #geom_dotplot(binaxis='y', stackdir='centerwhole',dotsize=.7)+
@@ -246,9 +246,10 @@ plt
 
 # ggsave(here("plots", "propSwitchTrials_bybin.png"), width = 18.3, height = 5.46)
 
-#-------------------------------#
-## Switching Bin analysis    ####
-#-------------------------------#
+#--------------------------------------------------------------------#
+## Switching Bin analysis ("Switching behavior across trials")    ####
+#--------------------------------------------------------------------#
+
 kidsSwitch<- switchByBin %>% filter(group == "child")
 adultSwitch<- switchByBin %>% filter(group == "adult")
 
@@ -299,7 +300,7 @@ ggplot(data = nonMax_StatusBin, aes(x = bin, y = explore, group=bin, fill =group
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
         axis.text.x = element_text(size=24))+
-  ylab("Proporion of non-maximizing choices")+
+  ylab("Proportion of non-maximizing choices")+
   ylim(0,1)
 
 plt
@@ -323,265 +324,14 @@ ggplot(data = switch_StatusBin, aes(x = bin, y = switch, group=bin, fill =group)
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
         axis.text.x = element_text(size=24))+
-  ylab("Proporion of switching choices")+
+  ylab("Proportion of switching choices")+
   ylim(0,1)
 
 # ggsave(here("plots", "switch_byStatusBin.png"), width = 14.3, height = 7.46)
 
-##################################################################################################
-
-data_clean_S1 <- read_csv(here("data_tidy", "bandit-data_sum-clean.csv"))  # study 1 data
-data_clean_rep <- read_csv(here("data_tidy","bandit-rep-data_sum-clean.csv"))         # study 2 data
-data_clean_rep <- data_clean_rep %>% dplyr::select(c(subjID, condition, switch, group, correct, correct_8, explore, status, time, totalEarn))
-
-data_clean_S1S2 <- rbind(data_clean_S1, data_clean_rep)       # combine study 1 and 2 data
-
-# total points earned by those who discovered the 8-star monster
-cumsum_discovered <- 
-  data_clean_S1S2 %>% 
-  arrange(subjID) %>%
-  filter(status==1) %>%  # only those who have discovered 8-star monster
-  dplyr::select(c(subjID,condition,group,time)) %>% 
-  merge (all_trials) %>%
-  arrange(subjID,trial)  %>%
-  dplyr::select(c(subjID,condition,group,time, trial, earnedCumulative)) %>%
-  filter(time==trial) %>%
-  dplyr::select(-c(time)) %>%
-  rowwise() %>%
-  mutate(avgEarnedPreDisc = (earnedCumulative/trial))
-        
-cumsum_discovered <- distinct(cumsum_discovered)    # remove duplicate rows/observations
-
-cumsum_final <- 
-  data_clean_S1S2 %>% 
-  filter(status==1) %>% 
-  dplyr::select(c(subjID,condition,group,time)) %>% 
-  arrange(subjID) %>%
-  merge(all_trials) %>%
-  filter(trial==80) %>% 
-  dplyr::select(c(subjID,condition,group,trial,earnedCumulative)) 
-
-cumsum_final$avgEarnedPreDisc <- NA
-
-cumsum_final <- distinct(cumsum_final)              # remove duplicate rows/observations
-
-earned_afterDisc <- 
-  rbind(cumsum_discovered,cumsum_final) %>% 
-  arrange(subjID) %>%
-  mutate(earnedLagged = lag(earnedCumulative), 
-         trialDiscovered=lag(trial),
-         avgEarnedPreDiscLagged=lag(avgEarnedPreDisc)) %>%
-  rowwise() %>%
-  mutate(earnedafterDisc = earnedCumulative-earnedLagged, # total no. of stars earned by the end of the task - total no. of stars up until discovering 8 stars
-         trialsPostDisc = trial-trialDiscovered) %>% # no. of trials after discovering 8 stars
-  ungroup() %>%
-  filter(trial==80) %>% # keep only rows where useful data is
-  dplyr::select(-c(avgEarnedPreDisc, trial, condition)) %>%
-  rowwise() %>%
-  mutate (avgEarnedPostDisc = earnedafterDisc/trialsPostDisc) %>% # mean no. of stars per trial after discovery
-  mutate (avgDiff = avgEarnedPostDisc - avgEarnedPreDiscLagged) %>%
-  ungroup()
-
-earned_after_40 <- 
-  all_trials %>%
-  filter(trial==40 | trial==80) %>%
-  select(c(subjID,condition,group,trial,earnedCumulative)) %>% 
-  arrange(subjID) %>%
-  mutate (earnedLagged = lag(earnedCumulative),
-          avg_1sthalf = earnedLagged/40) %>%
-  rowwise() %>%
-  mutate(earned_2ndhalf=(earnedCumulative-earnedLagged),
-         avg_2ndhalf = (earned_2ndhalf/40),
-         diff_2nd_1st = (avg_2ndhalf-avg_1sthalf)) %>%
-  filter(c(trial==80)) 
-
-# Number of stars earned after discovery of the 8-star option in the dynamic condition 
-ggplot(
-  earned_afterDisc,
-  aes(x = group, y = earnedafterDisc, fill=group)
-) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("earned after discovery") + 
-  xlab("Group") +
-  theme(legend.position="none") 
-
-library(BayesFactor)
-
-temp_sum = earned_afterDisc[earned_afterDisc$group %in% c("child", "adult"),]
-temp_sum$group = factor(temp_sum$group)
-
-plot(earnedafterDisc ~ group, data = temp_sum)
-starsEarnedPostDisc = ttestBF(formula = earnedafterDisc ~ group, data = temp_sum)
-starsEarnedPostDisc
-
-# [1] Alt., r=0.707 : 0.8929882 ±0.01%
-
-# Comparing the increase in number of stars earned per trial post and pre discovery of 8-star option
-ggplot(
-  earned_afterDisc,
-  aes(x = group, y = avgDiff, fill=group)
-) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("avg earned per trial post-discovery - pre-discovery") + 
-  xlab("Group") +
-  theme(legend.position="none") 
-
-plot(avgDiff ~ group, data = temp_sum)
-test_avgDiff = ttestBF(formula = avgDiff ~ group, data = temp_sum)
-test_avgDiff
-# [1] Alt., r=0.707 : 0.2798457 ±0.01%
-
-# Total number of stars earned in the second half of the game (trials 40–80)
-ggplot(
-  earned_after_40,
-  aes(x = group, y = earned_2ndhalf, fill=group)
-) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("earned after trial 40") + 
-  xlab("Group") +
-  theme(legend.position="none") +
-  facet_wrap(~condition)
-
-# Increase on the mean number of stars earned per trial in the 2nd half of the task (trials 40–80)
-ggplot(
-  earned_after_40,
-  aes(x = group, y = diff_2nd_1st, fill=group)
-) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("avg stars per trial 2nd half - 1st half") + 
-  xlab("Group") +
-  theme(legend.position="none") +
-  facet_wrap(~condition)
-
-
-# dynamic trials only, prop best choices analysis
-
-model<-glm(dynamicTrials$best~dynamicTrials$group*dynamicTrials$half)
-model<-glm(dynamicSecondHalf$best~dynamicSecondHalf$group+dynamicSecondHalf$trial)
-
-
-model<-lm(prop_best_dyn$best~prop_best_dyn$group*prop_best_dyn$half)
-summary(model)
-model<-lm(prop_best_all$best~prop_best_all$group*prop_best_all$half*prop_best_all$condition)
-
-
-lmBF(data=prop_best_dyn, best~group*half)
-lmBF(data=prop_best_dyn, best~group*half+group+half)
-
-###################
-###Switch data#####
-###################
-
-all_trials$choice<-all_trials$earnedThis
-prevChoice<-all_trials$choice
-prevChoice<-c('',prevChoice)
-n<-length(prevChoice)
-prevChoice<-prevChoice[1:n-1]
-all_trials$prevChoice<-prevChoice
-all_trials$prevChoice[all_trials$trial==1]<- 0
-all_trials$switch<-0
-all_trials[all_trials$prevChoice!=all_trials$choice,]$switch<-1
-
-switchByBin<-aggregate(data = all_trials, switch~bin+subjID+group+condition, FUN = "mean",na.rm=TRUE)
-
-# manuscript plot figure
-plt<-ggplot(data = switchByBin, aes(x = bin, y = switch, group=bin, fill =group))+
-  #geom_line(aes(group=subjID), size=.74,color="black", alpha=.1)+
-  #geom_dotplot(binaxis='y', stackdir='centerwhole',dotsize=.7)+
-  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
-  # facet_grid(~condition, labeller=labeller(condition=cond.labs2))+
- facet_grid(condition~group, labeller=labeller(condition=cond.labs2, group = group.labs))+
-  #geom_jitter(width = .1, alpha = .2)+
-  scale_fill_manual(values = c("#396AB1","#ed9523"))+
-  theme_bw()+
-  xlab("Trial")+
-  theme(legend.position = "none") +
-  scale_x_continuous(breaks = c(0, 1, 2, 3),
-               labels = c("Trials 1-20", "Trials 21-40", "Trials 41-60", "Trials 61-80"))+ 
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
-  theme(axis.text.y = element_text(face="bold", size=18), strip.text.x = element_text(size = 28),
-        strip.text.y = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24))+
-  ylab("Proporion of switch choices")+
-  ylim(0,1)
-
-plt
-
-#ggsave(here("plots", "propSwitchTrials_bybin.png"), width = 18.3, height = 5.46)
-
-
-switchByBin$bin<-as.factor(switchByBin$bin)
-
-summary(lm(data = switchByBin, switch~bin*group))
-
-switchByBin$kidf<-as.numeric(switchByBin$group)
-
-switchBinBF<-anovaBF(data = switchByBin, formula = switch~bin+kidf)
-
-switchBinBF<-lmBF(data = switchByBin, formula = switch~bin+group)
-switchGroupBF<-lmBF(data = switchByBin, formula = switch~group)
-binOnlyBFF<-lmBF(data = switchByBin, formula = switch~bin)
-
-switchBinBF/switchGroupBF
-
-
-
-switchBinBF[3]/switchBinBF[2]
-################################
-###Correct on all post-test#####
-################################
-
-study1 <- read_csv(here("data_tidy","bandit-data_sum-clean-withreward.csv"))      
-age_info<-read_csv("study1_ageinfo.csv")
-study1<-merge(study1,age_info, by.x="subjID")
-study2 <- read_csv(here("data_tidy","bandit-rep-data_sum-clean.csv"))     
-age_info<-read_csv("study2_ageinfo.csv")
-study2<-merge(study2,age_info, by.x="subjID")
-allDataSum<-rbind(study1,study2)
-
- 
-plt<- ggplot(data= allDataSum, aes(x=group, y = correct, fill=group))+
-  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
-  scale_fill_manual(values = c("#396AB1","#ed9523"))+
-  theme_bw()+
-  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+   #error bar
-#  scale_x_discrete(breaks = c(0,1), labels = c("Trials 1-40", "Trials 41-80"))+
-  theme(axis.text.y = element_text(face="bold", size=12))+
-  theme(axis.text.x = element_text(face="bold", size=12))+
-  theme(legend.position = c("none"))+
-  ylim(0,1)+
-  ylab("Proporion of correct \n post-test answers")+
-  xlab(" ")+
-  theme(text = element_text(size=20))+
-  facet_wrap(~condition, labeller=labeller(condition=cond.labs, group=group.labs))
-
-plt
-
-
-dataDynamic <- allDataSum %>% filter(condition == "dynamic")
-dataStatic <- allDataSum %>% filter(condition == "static")
-
-t.test(dataDynamic$correct~dataDynamic$group)
-t.test(dataStatic$correct~dataStatic$group)
-
-dyCorrect<-ttestBF(data = dataDynamic, formula = correct~group)
-stCorrect<-ttestBF(data = dataStatic, formula=correct~group)
-summary(aov(allDataSum$correct~allDataSum$group+allDataSum$condition))
-
-a<-lmBF(data=allDataSum, formula=correct~condition+group)
-summary(lm(allDataSum$correct~allDataSum$group+allDataSum$condition))
-
-summary(lm(all_trials$switch~all_trials$group+all_trials$trial))
+#--------------------------------------------------------------------#
+##                  Post-test combined analysis                   ####
+#--------------------------------------------------------------------#
 
 # Correct by monster
 
@@ -592,17 +342,6 @@ study2post <- read_csv(here("data_tidy","study2_posttest.csv"))
 study2post$study <- 2
 
 combinedPost <- rbind(study1post, study2post)[-1]
-
-# mean overall for adults, study 2
-subset(combinedPost, study == 2 & group == "adult")$correct %>% mean()
-subset(combinedPost, study == 2 & group == "adult" & condition == "dynamic")$correct %>% mean()
-subset(combinedPost, study == 2 & group == "adult" & condition == "static")$correct %>% mean()
-
-# mean overall for children, study 2
-subset(combinedPost, study == 2 & group == "child")$correct %>% mean()
-subset(combinedPost, study == 2 & group == "child" & condition == "dynamic")$correct %>% mean()
-subset(combinedPost, study == 2 & group == "child" & condition == "static")$correct %>% mean()
-
 
 # broken down by monster
 
@@ -617,23 +356,6 @@ combinedPost_long <- combinedPost %>%
 
 combinedPost_long$question <- ifelse(combinedPost_long$question == "1", paste0(combinedPost_long$question, " star"), # if "1" then "1 star"
                                      paste0(combinedPost_long$question, " stars")) # if not "1" then "X stars" (e.g., "8 stars")
-
-# mean for study 2, dynamic, adults,incl. 8-star (should replicate previous)
-tmp <- subset(combinedPost_long, study == 2 & group == "adult" & condition == "dynamic") %>%
-  group_by(subjID) %>%
-  summarise(correctProp = mean(correctProp)) %>%
-  ungroup() 
-
-tmp$correctProp %>% mean()
-
-# mean for study 2, dynamic, adults, excl. 8-star
-tmp <- subset(combinedPost_long, study == 2 & group == "adult" & condition == "dynamic") %>%
-  filter(question != "8 stars") %>%
-  group_by(subjID) %>%
-  summarise(correctProp = mean(correct)) %>%
-  ungroup() 
-
-tmp$correctProp %>% mean()
 
 # plot of correct post-test broken down by monster question
 ggplot(data = combinedPost_long,
@@ -650,7 +372,7 @@ ggplot(data = combinedPost_long,
   theme(axis.text.x = element_text(face="bold", size=12))+
   theme(legend.position = c("none"))+
   ylim(0,1)+
-  ylab("Proporion of correct \n post-test answers")+
+  ylab("Proportion of correct \n post-test answers")+
   xlab(" ")+
   theme(text = element_text(size=20))+
   facet_grid(group~condition) +

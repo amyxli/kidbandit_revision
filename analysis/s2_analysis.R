@@ -28,16 +28,20 @@ data_sum$group = factor(data_sum$group)
 plot(switch ~ group, data = data_sum, main = "% switching choices")
 
 switchBF = ttestBF(formula = switch ~ group, data = data_sum)
-switchBF ## [1]Alt., r=0.707 : 3.018208e+18 ±0% with 50 adults
-## [1] Alt., r=0.707 : 7.620799e+36 ±0% with all adults
+switchBF ## [1]Alt., r=0.707 : 7.620799e+36 ±0%
 
 switchChains= posterior(ttestBF(formula = switch ~ group, data = data_sum),iterations=1000)
 
-mean(switchChains[,2]) # mean difference
-quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(switchChains[,4])# effect size estimite
-quantile(switchChains[,4],probs=c(0.025,0.975)) # effect size  CI
+mean(switchChains[,2]) # mean difference -0.6184066
+quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI -0.6846195 -0.5512568 
+mean(switchChains[,4])# effect size estimite -3.021579
+quantile(switchChains[,4],probs=c(0.025,0.975)) # effect size  CI -3.479296 -2.565163 
+
+# Frequentist equivalent
+t.test(formula = switch ~ group, data = data_sum)
+#t = -13.468, df = 56.477, p-value < 2.2e-16; 95% CI -0.7154756 -0.5302261
 cohen.d(formula = switch ~ group, data = data_sum) #regular cohen's d
+# -3.043196; CI -3.513635 -2.572757 
 
 # Let us test normality assumption
 data_sum %>%
@@ -85,15 +89,17 @@ sum(b_switch_diff <= 0)
 plot(explore ~ group, data = data_sum, main = "% 'explore' choices")
 
 exploreBF = ttestBF(formula = explore ~ group, data = data_sum)
-exploreBF ## Alt., r=0.707 : 9.574755e+18 ±0% with 50 adults
-## [1] Alt., r=0.707 : 2.588539e+37 ±0% with all adults
+exploreBF ## 2.588539e+37 ±0%
 
 exploreChains= posterior(ttestBF(formula = explore ~ group, data = data_sum),iterations=1000)
 
-mean(exploreChains[,2]) # mean difference
-quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(exploreChains[,4])# effect size estimite
-quantile(exploreChains[,4], probs=c(0.025,0.975)) # effect size  CI
+mean(exploreChains[,2]) # mean difference -0.492433
+quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI -0.5479371 -0.4349280 
+mean(exploreChains[,4])# effect size estimite -3.033899
+quantile(exploreChains[,4], probs=c(0.025,0.975)) # effect size  CI -3.508251 -2.563191 
+
+t.test(formula = explore ~ group, data = data_sum)
+#t = -13.518, df = 55.945, p-value < 2.2e-16; 95% CI -0.5698783 -0.4227744
 cohen.d(formula = explore ~ group, data = data_sum) #regular cohen's d
 
 # Let us test normality assumption

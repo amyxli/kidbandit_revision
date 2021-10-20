@@ -141,18 +141,19 @@ sum(b_explore_diff <= 0)
 ################################ reward ################################
 
 plot(totalEarn ~ group, data = data_sum, main = "Children win fewer stars than adults")
+aggregate(data = data_sum, totalEarn~group, FUN = "mean")
 
 rewardBF = ttestBF(formula = totalEarn ~ group, data = data_sum)
-rewardBF ## [1] Alt., r=0.707 : 1.280575e+17 ±0% with 50 adults
-         ## [1] Alt., r=0.707 : 6.415055e+29 ±0% with all adults
+rewardBF  ## [1] Alt., r=0.707 : 8.857099e+32 ±0%
 
 starChains= posterior(ttestBF(formula = totalEarn ~ group, data = data_sum),iterations=1000)
 
-mean(starChains[,2]) # mean difference
-quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(starChains[,4])# effect size estimite
-quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI
+mean(starChains[,2]) # mean difference 116.0546 
+quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI 101.9744 131.4045 
+mean(starChains[,4])# effect size estimite 2.746324
+quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI 2.301249 3.208194 
 cohen.d(formula = totalEarn ~ group, data = data_sum) #regular cohen's d
+#d estimate: 2.78887 (large) 95 percent confidence interval: 2.337442 3.240299 
 
 # Switch to a more robust analysis procedure - let's try the Bayesian bootstrap
 

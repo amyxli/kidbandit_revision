@@ -85,7 +85,7 @@ plot(explore ~ group, data = data_sum, main = "% 'explore' choices")
 
 
 exploreBF = ttestBF(formula = explore ~ group, data = data_sum)
-exploreBF ## [1] Alt., r=0.707 : 25693440 ±0%
+exploreBF ## [1] Alt., r=0.707 : 25693440 ±0% 
 
 exploreChains= posterior(ttestBF(formula = explore ~ group, data = data_sum),iterations=1000)
 
@@ -149,11 +149,11 @@ rewardBF ## [1] Alt., r=0.707 : 2679334 ±0%
 
 starChains= posterior(ttestBF(formula = totalEarn ~ group, data = data_sum),iterations=1000)
 
-mean(starChains[,2]) # mean difference
-quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
+mean(starChains[,2]) # mean difference 113.5538
+quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI 79.84202 147.55122 
 
-mean(starChains[,4])# effect size estimite
-quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI
+mean(starChains[,4])# effect size estimite 2.006812
+quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI 1.294476 2.714886 
 cohen.d(formula = totalEarn ~ group, data = data_sum) #regular cohen's d
 
 # Switch to a more robust analysis procedure - let's try the Bayesian bootstrap
@@ -177,10 +177,6 @@ plot(b_stars_diff)
 
 # Was zero a value for any of the 4000 BB replications?
 sum(b_stars_diff <= 0) #Output is 0
-
-
-
-
 
 #########################################################################################
 ################  Between-group comparisons for post-test performance  ##################

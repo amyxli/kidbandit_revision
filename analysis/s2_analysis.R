@@ -38,13 +38,6 @@ quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI -0.6846195 
 mean(switchChains[,4])# effect size estimite -3.021579
 quantile(switchChains[,4],probs=c(0.025,0.975)) # effect size  CI -3.479296 -2.565163 
 
-#* reported: SI *#
-# Frequentist equivalent
-t.test(formula = switch ~ group, data = data_sum)
-#t = -13.468, df = 56.477, p-value < 2.2e-16; 95% CI -0.7154756 -0.5302261
-cohen.d(formula = switch ~ group, data = data_sum) #regular cohen's d
-# -3.043196; CI -3.513635 -2.572757 
-
 ############################# 'Explore' choices #############################
 
 plot(explore ~ group, data = data_sum, main = "% 'explore' choices")
@@ -59,11 +52,6 @@ quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI -0.5479371
 mean(exploreChains[,4])# effect size estimite -3.033899
 quantile(exploreChains[,4], probs=c(0.025,0.975)) # effect size  CI -3.508251 -2.563191 
 
-t.test(formula = explore ~ group, data = data_sum)
-#t = -13.518, df = 55.945, p-value < 2.2e-16; 95% CI -0.5698783 -0.4227744
-cohen.d(formula = explore ~ group, data = data_sum) #regular cohen's d
-
-
 ################################ Stars Won ################################
 
 aggregate(data = data_sum, totalEarn~group, FUN = "mean")
@@ -77,13 +65,6 @@ mean(starChains[,2]) # mean difference 116.0546
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI 101.9744 131.4045 
 mean(starChains[,4])# effect size estimite 2.746324
 quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI 2.301249 3.208194 
-
-# Frequentist equivalent
-t.test(formula = totalEarn ~ group, data = data_sum) #t = 11.925, df = 54.2, p-value < 2.2e-16
-# 95% CI   97.27606 136.59177
-
-cohen.d(formula = totalEarn ~ group, data = data_sum) #regular cohen's d
-#d estimate: 2.78887 (large) 95 percent confidence interval: 2.337442 3.240299 
 
 #########################################################################################
 ################  Between-group comparisons for post-test performance  ##################

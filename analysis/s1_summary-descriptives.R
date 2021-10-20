@@ -1,6 +1,6 @@
 #Kidbandit Descriptives and Analysis Script
 #Date: 06/2/2019
-#Last edited by ESS
+#Last edited by AXL 20/10/21
 
 ## This script does higher level cleaning and summarizing of data from the first 24
 ## adult and child participants. It outputs a summary file containing descriptives of
@@ -140,30 +140,6 @@ stars8Adult<-postTestA[postTestA$stimulus=="Which, if any, of these monsters eve
 
 pTA_correct<-aggregate(data=postTestA, correct~subjID, FUN=mean)
 pTA_8<-aggregate(data=stars8Adult, correct~subjID, FUN=identity)
-
-# # Make new data frame with variable "question" (1, 2, 3, 6, or 8 star) and "correct"
-# 
-# tmp <- postTestC %>% select(c(subjID, group, condition, stimulus, correct)) 
-# tmp <- tmp %>% rbind(postTestA %>% select(c(subjID, group, condition, stimulus, correct)))
-# 
-# tmp <- tmp %>% 
-#   mutate(question = ifelse(grepl("1 star", stimulus), "1", 
-#                            ifelse(grepl("2 stars", stimulus), "2",
-#                                   ifelse(grepl("3 stars", stimulus), "3",
-#                                          ifelse(grepl("6 stars", stimulus), "6",
-#                                                 ifelse(grepl("8 stars", stimulus), "8",
-#                                                        NA))))))
-# 
-# tmp$question <- as.factor(tmp$question)
-# 
-# ggplot(data = tmp,
-#        mapping = aes(
-#          x = question,
-#          y = correct, 
-#          fill = group)
-# ) +
-#   geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5) +
-#   facet_grid(~condition)
 
 #######################################################################################
 ##                         Change discovery in dynamic                               ## 

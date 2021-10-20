@@ -1,7 +1,4 @@
-## Last edited 19/10/21 AXL
-
-## This script analyzes data from replication adult and child participants.
-## ESS added analysis on post-tests 1/24/2020.
+#Last edited by AXL 20/10/21
 
 library(tidyverse)
 library(ggthemes)

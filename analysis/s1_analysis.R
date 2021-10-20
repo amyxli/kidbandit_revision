@@ -39,13 +39,6 @@ quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
 mean(switchChains[,4])# effect size estimite
 quantile(switchChains[,4],probs=c(0.025,0.975)) # effect size  CI
 
-#* reported: SI *#
-# Frequentist equivalent
-t.test(formula = switch ~ group, data = data_sum)
-# t = -10.552, df = 26.474, p-value = 5.556e-11 95% CI  -0.7920063 -0.5339430
-cohen.d(formula = switch ~ group, data = data_sum) #regular cohen's d
-# -3.046179 (large); CI 3.900159 -2.192200 
-
 ############################# 'Explore' choices #############################
 
 plot(explore ~ group, data = data_sum, main = "% 'explore' choices")
@@ -60,11 +53,6 @@ mean(exploreChains[,2]) # mean difference
 quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
 mean(exploreChains[,4])# effect size estimite
 quantile(exploreChains[,4],probs=c(0.025,0.975)) # effect size  CI
-
-# Frequentist equivalent
-t.test(formula = explore ~ group, data = data_sum)
-# t = -8.0297, df = 44.021, p-value = 3.645e-10 95% CI  -0.6125612 -0.3667637
-cohen.d(formula = explore ~ group, data = data_sum) #regular cohen's d
 
 ################################ Stars Won ################################
 
@@ -81,12 +69,6 @@ quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI 79.84202 147.
 
 mean(starChains[,4])# effect size estimite 2.006812
 quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI 1.294476 2.714886 
-
-# Frequentist equivalent
-t.test(formula = totalEarn ~ group, data = data_sum)  #t = 7.3218, df = 39.968, p-value = 6.742e-09
-#95 percent confidence interval: 85.51732 150.73268
-cohen.d(formula = totalEarn ~ group, data = data_sum) #regular cohen's d
-#d estimate: 2.113609 (large) 95 percent confidence interval: 1.388217 2.839001 
 
 #-------------------------------------------------------------------------------------#
 ############    Between-group comparisons for post-test performance  ##################

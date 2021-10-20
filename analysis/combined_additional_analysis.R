@@ -1,4 +1,5 @@
-#Kidbandit Additional Analyses Script
+#Kidbandit Combined Additional Analyses Script
+
 # Contains code for prop. best choices, + other exploratory analyses
 # Data collapsed across study 1 & 2
 ## Edit history
@@ -57,7 +58,6 @@ all_trials$half<-floor((all_trials$trial-1)/half)
 
 # Define other dfs needed later ####
 dynamicTrials<-all_trials[all_trials$condition=="dynamic",] # dynamic only
-dynamicSecondHalf<-dynamicTrials[dynamicTrials$trial>40,]
 
 # Define variables for plotting labels etc ####
 
@@ -146,6 +146,7 @@ plt
 #-------------------------------------#
 # analysis of prop. "best" choices ####
 #-------------------------------------#
+#* reported: paper #
 
 # descriptives of prop best choice
 aggregate(data = prop_best_all, best~group+condition+half, FUN = "mean")
@@ -164,12 +165,6 @@ dy1Chains= posterior(ttestBF(formula = best ~ group, data = dy1),iterations=1000
 mean(dy1Chains[,2]) # mean difference 0.4340019
 quantile(dy1Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3654670 0.5013863 
 mean(dy1Chains[,4])# effect size estimite 2.480047
-quantile(dy1Chains[,4],probs=c(0.025,0.975)) # effect size  CI 1.997307 3.007777 
-cohen.d(formula = best ~ group, data = dy1) #regular cohen's d 2.518311
-
-t.test(best~group, data=dy1)
-#t = 12.718, df = 85.83, p-value < 2.2e-16
-#95 percent confidence interval: 0.3684283 0.5049510
 
 # dynamic, trials 40-80, t-test adult vs child in prop best 
 dy2BF<-ttestBF(data=dy2, formula = best~group)
@@ -178,10 +173,6 @@ mean(dy2Chains[,2]) # mean difference -0.08148977
 quantile(dy2Chains[,2],probs=c(0.025,0.975)) # mean difference CI -0.156260544 -0.005062601 
 mean(dy2Chains[,4])# effect size estimite -0.4159093
 quantile(dy2Chains[,4],probs=c(0.025,0.975)) # effect size  CI -0.78719831 -0.02623713
-cohen.d(formula = best ~ group, data = dy2) #regular cohen's d  -0.4547433
-
-t.test(best~group, data=dy2)
-# t = -2.4407, df = 95.261, p-value = 0.01651  95% CI  -0.1618265 -0.0166563
 
 # static, trials 1-40
 st1BF<-ttestBF(data=st1, formula = best~group)
@@ -190,11 +181,6 @@ mean(st1Chains[,2]) # mean difference 0.4050065
 quantile(st1Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3362364 0.4767578  
 mean(st1Chains[,4])# effect size estimite 2.573828
 quantile(st1Chains[,4],probs=c(0.025,0.975)) # effect size  CI 2.009807 3.201157 
-cohen.d(formula = best ~ group, data = st1) #regular cohen's d  2.624509 
-
-t.test(best~group, data=st1)
-#t = 7.9796, df = 26.411, p-value = 1.657e-08
-#95% CI 0.850000 0.440625 
 
 # static, trials 40-80
 st2BF<-ttestBF(data=st2, formula = best~group)
@@ -203,8 +189,6 @@ mean(st2Chains[,2]) # mean difference 0.4546788
 quantile(st2Chains[,2],probs=c(0.025,0.975)) # mean difference CI 0.3730642 0.5333622 
 mean(st2Chains[,4])# effect size estimite 2.732036
 quantile(st2Chains[,4],probs=c(0.025,0.975)) # effect size  CI 2.149687 3.316281 
-cohen.d(formula = best ~ group, data = st2) #regular cohen's d  2.781302
-
 
 dy1BF #[1] Alt., r=0.707 : 2.957546e+20 ±0%
 dy2BF #[1] Alt., r=0.707 : 2.365633 ±0%
@@ -253,6 +237,7 @@ plt
 kidsSwitch<- switchByBin %>% filter(group == "child")
 adultSwitch<- switchByBin %>% filter(group == "adult")
 
+#* reported: paper #
 lmBF(data=kidsSwitch, switch~bin) #bin : 0.5873183 ±0%
 lmBF(data=adultSwitch, switch~bin) #1.810572e+23 ±0.01%
 

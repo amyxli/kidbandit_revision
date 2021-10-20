@@ -1,7 +1,8 @@
 ## This script analyzes data from the first 24 adult and child participants.
 
-## Last edited 19/10/21 AXL
+## Last edited 20/10/21 AXL
 ## ESS added analysis on post-tests.
+##### analyses and figures included in manuscript are labeled #* reported *#
 
 library(tidyverse)
 library(ggthemes)
@@ -27,7 +28,8 @@ data_sum$group = factor(data_sum$group)
 
 plot(switch ~ group, data = data_sum, main = "% switching choices")
 
-switchBF = ttestBF(formula = switch ~ group, data = data_sum)
+#* reported: paper*#
+switchBF = ttestBF(formula = switch ~ group, data = data_sum) 
 switchBF ## [1] Alt., r=0.707 : 61998272767 ±0%
 
 switchChains= posterior(ttestBF(formula = switch ~ group, data = data_sum),iterations=1000)
@@ -36,7 +38,13 @@ mean(switchChains[,2]) # mean difference
 quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
 mean(switchChains[,4])# effect size estimite
 quantile(switchChains[,4],probs=c(0.025,0.975)) # effect size  CI
+
+#* reported: SI *#
+# Frequentist equivalent
+t.test(formula = switch ~ group, data = data_sum)
+# t = -10.552, df = 26.474, p-value = 5.556e-11 95% CI  -0.7920063 -0.5339430
 cohen.d(formula = switch ~ group, data = data_sum) #regular cohen's d
+# -3.046179 (large); CI 3.900159 -2.192200 
 
 # Let us test normality assumption
 data_sum %>%
@@ -464,6 +472,13 @@ exploreAgeBF<-lmBF(explore~AgeYear, dataChild)
 
 labels <- c(dynamic = "Dynamic condition", static = "Static condition")
 
+theme_custom <- theme(strip.text.x = element_text(size = 28),
+                      axis.title.y = element_text(size = 28, angle = 90),
+                      axis.title.x = element_text(size = 28),
+                      axis.text.x = element_text(size=24),
+                      axis.text.y = element_text(size=24)
+                      )
+
 plt<-ggplot(data_sum, aes(x=switch, y=totalEarn,color=group,shape=condition))+
   scale_color_manual(values = c("#cb77ff", "#4fc9bb"))+
   theme_bw()+
@@ -488,12 +503,7 @@ plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
   facet_grid(~condition, labeller=labeller(condition = labels))+
   ylim(0,500)+
   scale_x_discrete(labels = c("Adults", "Children"))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24),
-        axis.text.y = element_text(size=24)
-  )
+  theme_custom
 
 plt
 
@@ -512,12 +522,7 @@ plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
   theme(legend.position="none")+
   stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
   facet_grid(~condition, labeller=labeller(condition = labels))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24),
-        axis.text.y = element_text(size=24)
-  )
+  theme_custom
 
 
 plt
@@ -538,12 +543,8 @@ plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
   theme(legend.position="none")+
   stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
   facet_grid(~condition, labeller=labeller(condition = labels))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24),
-        axis.text.y = element_text(size=24)
-  )
+  theme_custom
+
 plt
 
 # ggsave(here("plots", "exp1_Switch.png"), width = 9.15, height = 5.66)
@@ -558,20 +559,12 @@ plt<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
   scale_x_discrete(labels = c("Adults", "Children"))+
   theme(legend.position="none") +
   facet_grid(~condition, labeller=labeller(condition = labels))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24)
-  )+
+  theme_custom +
   ylim(0,1)
 
 plt
 
-eight1<-plt
-#ggsave("exp1_8Star.png", width = 9.15, height = 5.46)
-
-
-
+# ggsave(here("plots", "exp1_8Star.png"), width = 9.15, height = 5.66)
 
 ######################################
 ## Bayes factors WITHIN conditions  ##

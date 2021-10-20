@@ -477,16 +477,12 @@ exploreAgeBF<-lmBF(explore~AgeYear, dataChild)
 ####################################################################
 labels <- c(dynamic = "Dynamic condition", static = "Static condition")
 
-plt<-ggplot(data_sum, aes(x=switch, y=totalEarn,color=group,shape=condition))+
-  scale_fill_manual(values = c("#f4d221", "#e5263a"))+
-  theme_bw()+
-  geom_point(size=4, alpha=.6) +
-  #  geom_jitter()+
-  ylim(200,500)
-
-
-plt
-
+theme_custom <- theme(strip.text.x = element_text(size = 28),
+                      axis.title.y = element_text(size = 28, angle = 90),
+                      axis.title.x = element_text(size = 28),
+                      axis.text.x = element_text(size=24),
+                      axis.text.y = element_text(size=24)
+)
 
 ##### EARNINGS ######
 plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
@@ -501,11 +497,7 @@ plt<-ggplot(data_sum, aes(x=group,y=totalEarn,fill=group))+
   facet_grid(~condition, labeller=labeller(condition = labels))+
   ylim(0,500)+
   scale_x_discrete(labels = c("Adults", "Children"))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24),
-        axis.text.y = element_text(size=24))
+  theme_custom
 
 plt
 
@@ -524,11 +516,7 @@ plt<-ggplot(data_sum, aes(x=group,y=explore,fill=group))+
   theme(legend.position="none")+
   stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
   facet_grid(~condition, labeller=labeller(condition = labels))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24),
-        axis.text.y = element_text(size=24))+
+  theme_custom +
   ylim(0,1)
 
 
@@ -548,11 +536,8 @@ plt<-ggplot(data_sum, aes(x=group,y=switch,fill=group))+
   theme(legend.position="none")+
   stat_summary(fun.y=mean, geom="point", shape=23, size=4)+
   facet_grid(~condition, labeller=labeller(condition = labels))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24),
-        axis.text.y = element_text(size=24))
+  theme_custom
+
 plt
 # ggsave(here("plots","exp2_Switch.png"), width = 9.15, height = 5.66)
 #ggsave("exp2_Switch_FULL.png", width = 9.15, height = 5.46)
@@ -570,19 +555,13 @@ plt<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
   scale_x_discrete(labels = c("Adults", "Children"))+
   theme(legend.position="none") +
   facet_grid(~condition, labeller=labeller(condition = labels))+
-  theme(strip.text.x = element_text(size = 28),
-        axis.title.y = element_text(size = 28, angle = 90),
-        axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24)
-  )+
+  theme_custom +
   ylim(0,1)
 
 
 plt
-eight2<-plt
 
-#ggsave("exp2_8Star.png", width = 9.15, height = 5.46)
-#ggsave("exp2_8Star_FULL.png", width = 9.15, height = 5.46)
+ggsave(here("plots", "exp2_8Star.png"), width = 9.15, height = 5.66)
 
 
 

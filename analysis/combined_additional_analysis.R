@@ -6,6 +6,7 @@
 ### 9/11/19 -- ESS looked at
 ### October 21 -- AXL revision
 ##### update data loaded to latest version, script organisation, clean-up
+##### analyses and figures included in manuscript are labeled #* reported *#
 
 library(tidyverse)
 library(ggthemes)
@@ -119,30 +120,28 @@ tabyl(tmp, group, prop_best_lvl)
 # manuscript plot figure: Proporion of time choosing the best monster,
 # both static and dynamic, broken down by halves of experiment
 
-plt<- ggplot(data= prop_best_all, aes(x=half, y = best, fill=group, group=group))+
+plt<- ggplot(data= prop_best_all, aes(x=as.factor(half), y = best, fill=group, group=group))+
   geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = .85, color="black", alpha=.5)+
   scale_fill_manual(values = c("#396AB1","#ed9523"), name = "", labels = c("Adults", "Children"))+
   theme_bw()+
   stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.85))+   #error bar
-  scale_x_discrete(breaks = c(0,1), labels = c("Trials 1-40", "Trials 41-80"))+
-  theme(axis.text.y = element_text( size=12))+
-  theme(axis.text.x = element_text(face="bold", size=12))+
-  #theme(legend.position =  c(0.92, 0.85))+
   ylim(0,1)+
-  ylab("Proporion of time \n choosing the best monster")+
+  ylab("Proportion of time \n choosing the best monster")+
   xlab(" ")+
-  # theme(text = element_text(size=20), axis.text.y = element_text(face="bold", size=12))+
-  theme(axis.text.y = element_text(face="bold", size=18), strip.text.x = element_text(size = 28),
+  scale_x_discrete(breaks = c(0,1), labels = c("Trials 1-40", "Trials 41-80")) +
+  theme(strip.text.x = element_text(size = 28),
         strip.text.y = element_text(size = 28),
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
         axis.text.x = element_text(size=24),
-        text = element_text(size=20))+
-  facet_wrap(~condition, labeller=labeller(condition=cond.labs))
+        axis.text.y = element_text(size=24),
+        legend.text = element_text(size=24),
+        text = element_text(size=20)) +
+  facet_wrap(~condition, labeller=labeller(condition=cond.labs)) 
 
 plt
 
-# ggsave(here("plots", "propBest.png"), width = 13.15, height = 5.46)
+# ggsave(here("plots", "propBest.png"), width = 13.15, height = 5.86)
 
 #-------------------------------------#
 # analysis of prop. "best" choices ####
@@ -232,14 +231,15 @@ plt<-ggplot(data = switchByBin, aes(x = bin, y = switch, group=bin, fill =group)
   xlab("Trial")+
   theme(legend.position = "none") +
   scale_x_continuous(breaks = c(0, 1, 2, 3),
-                     labels = c("Trials 1-20", "Trials 21-40", "Trials 41-60", "Trials 61-80"))+ 
+                     labels = c("1-20", "21-40", "41-60", "61-80"))+ 
   stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
-  theme(axis.text.y = element_text(face="bold", size=18), strip.text.x = element_text(size = 28),
+  theme(strip.text.x = element_text(size = 28),
         strip.text.y = element_text(size = 28),
         axis.title.y = element_text(size = 28, angle = 90),
         axis.title.x = element_text(size = 28),
-        axis.text.x = element_text(size=24))+
-  ylab("Proporion of switch choices")+
+        axis.text.x = element_text(size=24),
+        axis.text.y = element_text(size=24))+
+  ylab("Proportion of switch choices")+
   ylim(0,1)
 
 plt

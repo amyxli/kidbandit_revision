@@ -14,10 +14,10 @@ data_sum <- read_csv(here("data_tidy", "study2_data_sum.csv"))
 age_info<-read_csv(here("data_tidy","study2_ageinfo.csv"))
 data_sum<-merge(data_sum,age_info, by.x="subjID")
 
-#######################################################################################
-####                  Analysis for switching and explore* and stars                ####
-####            *Note that explore is called 'non-maximizing' in the paper         ####
-#######################################################################################
+#-------------------------------------------------------------------------------------#
+##                    Analysis for switching and explore* and stars                ####
+##              *Note that explore is called 'non-maximizing' in the paper           ##
+#-------------------------------------------------------------------------------------#
 library(BayesFactor)
 
 data_sum = data_sum[data_sum$group %in% c("child", "adult"),]

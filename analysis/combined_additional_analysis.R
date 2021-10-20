@@ -618,24 +618,6 @@ combinedPost_long <- combinedPost %>%
 combinedPost_long$question <- ifelse(combinedPost_long$question == "1", paste0(combinedPost_long$question, " star"), # if "1" then "1 star"
                                      paste0(combinedPost_long$question, " stars")) # if not "1" then "X stars" (e.g., "8 stars")
 
-
-# mean for study 1, dynamic, adults, incl. 8-star question (should replicate prev)
-tmp <- subset(combinedPost_long, study == 1 & group == "adult" & condition == "dynamic") %>%
-  group_by(subjID) %>%
-  summarise(correctProp = mean(correct)) %>%
-  ungroup() 
-
-tmp$correctProp %>% mean()
-
-# mean for study 1, dynamic, adults, excl. 8-star question
-tmp <- subset(combinedPost_long, study == 1 & group == "adult" & condition == "dynamic") %>%
-  filter(question != "8 stars") %>%
-  group_by(subjID) %>%
-  summarise(correctProp = mean(correct)) %>%
-  ungroup() 
-
-tmp$correctProp %>% mean()
-
 # mean for study 2, dynamic, adults,incl. 8-star (should replicate previous)
 tmp <- subset(combinedPost_long, study == 2 & group == "adult" & condition == "dynamic") %>%
   group_by(subjID) %>%

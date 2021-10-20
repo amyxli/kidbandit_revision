@@ -15,10 +15,10 @@ data_sum <- read_csv(here("data_tidy", "study1_data_sum.csv"))
 age_info<-read_csv(here("data_tidy","study1_ageinfo.csv"))
 data_sum<-merge(data_sum,age_info, by.x="subjID")
 
-#######################################################################################
-####                  Analysis for switching and explore* and stars                ####
-####            *Note that explore is called 'non-maximizing' in the paper         ####
-#######################################################################################
+#-------------------------------------------------------------------------------------#
+##                    Analysis for switching and explore* and stars                ####
+##              *Note that explore is called 'non-maximizing' in the paper           ##
+#-------------------------------------------------------------------------------------#
 library(BayesFactor)
 
 data_sum = data_sum[data_sum$group %in% c("child", "adult"),]
@@ -90,13 +90,12 @@ t.test(formula = totalEarn ~ group, data = data_sum)  #t = 7.3218, df = 39.968, 
 cohen.d(formula = totalEarn ~ group, data = data_sum) #regular cohen's d
 #d estimate: 2.113609 (large) 95 percent confidence interval: 1.388217 2.839001 
 
-#########################################################################################
-################  Between-group comparisons for post-test performance  ##################
-#########################################################################################
+#-------------------------------------------------------------------------------------#
+############    Between-group comparisons for post-test performance  ##################
+#-------------------------------------------------------------------------------------#
 
-########
-#8-star#
-########
+###      8-star      ####
+
 # Preliminary glimpse at diff in proportion of correctly identifying 8-star option between 
 # adult and child groups
 
@@ -119,6 +118,39 @@ contingencyTableBF(dynamic,sampleType = "poisson")
 # Bayesian test of association Non-indep. (a=1) : 276.4305 ±0%
 # in favor of a relationship between age group and answers to this question
 
+###      Overall      ####
+
+
+# mean prop overall correct in posttest
+aggregate(data = data_sum, correct~ condition + group, FUN = "mean") #* reported: paper*#
+
+# mean for study 1, dynamic, adults, EXCLUDING 8-star question
+study1post <- read_csv(here("data_tidy","study1_posttest.csv"))[-1]
+
+study1post_long <- study1post %>% 
+  rename(correctProp = correct) %>%
+  pivot_longer(
+    cols = c(6:10), 
+    names_to = "question", 
+    names_prefix = "correct_",
+    values_to = "correct"
+  )
+
+study1post_long$question <- ifelse(study1post_long$question == "1", paste0(study1post_long$question, " star"), # if "1" then "1 star"
+                                     paste0(study1post_long$question, " stars")) # if not "1" then "X stars" (e.g., "8 stars")
+
+tmp <- subset(study1post_long, question != "8 stars" & group == "adult" & condition == "dynamic") %>%
+  group_by(subjID) %>%
+  summarise(correctProp = mean(correct)) %>%
+  ungroup() 
+
+tmp$correctProp %>% mean()
+
+# t-test for children vs. chance, by condition
+dataChild<- data_sum %>% filter(group == "child")
+
+ttestBF(subset(dataChild, condition=="dynamic")$correct, mu=.2) #*reported: paper*# 2.02 x 10^5
+ttestBF(subset(dataChild, condition=="static")$correct, mu=.2) # data constant since everyone got 100%
 
 ##################################
 #####      LINEAR MODELS      ####
@@ -248,100 +280,3 @@ plt<- ggplot(data_sum, aes(x = group, y = correct_8, fill=group)) +
 plt
 
 # ggsave(here("plots", "exp1_8Star.png"), width = 9.15, height = 5.66)
-
-######################################
-## Bayes factors WITHIN conditions  ##
-######################################
-dataDynamic <- data_sum %>% filter(condition == "dynamic")
-dataStatic <- data_sum %>% filter(condition == "static")
-
-### Switching Dynamic ###
-switchBF = ttestBF(formula = switch ~ group, data = dataDynamic)
-switchBF ## [1] Alt., r=0.707 : 8951340
-
-switchChains= posterior(ttestBF(formula = switch ~ group, data = dataDynamic),iterations=1000)
-
-mean(switchChains[,2]) # mean difference  -0.6894053
-quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(switchChains[,4])# effect size estimite -3.155044
-quantile(switchChains[,4]) # effect size  CI
-cohen.d(formula = switch ~ group, data = dataDynamic) #regular cohen's d -3.3259
-
-
-
-### Switching Static ###
-switchBF = ttestBF(formula = switch ~ group, data = dataStatic)
-switchBF ## [1] Alt., r=0.707 :  384.60 0%
-
-switchChains= posterior(ttestBF(formula = switch ~ group, data = dataStatic),iterations=1000)
-
-mean(switchChains[,2]) # mean difference  -0.5469376
-quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(switchChains[,4])# effect size estimite -2.282956
-quantile(switchChains[,4]) # effect size  CI
-cohen.d(formula = switch ~ group, data = dataStatic) #regular cohen's d 2.614426
-
-
-### Non-max Dynamic ###
-exploreBF = ttestBF(formula = explore ~ group, data = dataDynamic)
-exploreBF ## [1] Alt., r=0.707 : 13424560 ±0%
-
-exploreChains= posterior(ttestBF(formula = explore ~ group, data = dataDynamic),iterations=1000)
-
-mean(exploreChains[,2]) # mean difference  -0.5446166
-quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
-
-mean(exploreChains[,4])# effect size estimite  -3.213626
-quantile(exploreChains[,4]) # effect size  CI
-cohen.d(formula = explore ~ group, data = dataDynamic) #regular cohen's d -3.394606
-
-### Non-max Static ###
-exploreBF = ttestBF(formula = explore ~ group, data = dataStatic)
-exploreBF ## [1] Alt., r=0.707 : 4.98958±0%
-
-exploreChains= posterior(ttestBF(formula = explore ~ group, data = dataStatic),iterations=1000)
-
-mean(exploreChains[,2]) # mean difference -0.3046656
-quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
-
-mean(exploreChains[,4])# effect size estimite -1.092418
-quantile(exploreChains[,4]) # effect size  CI
-cohen.d(formula = explore ~ group, data = dataStatic) #regular cohen's d -1.363703 
-
-
-### Reward dynamic ###
-rewardBF = ttestBF(formula = totalEarn ~ group, data = dataDynamic)
-rewardBF ## [1] Alt., r=0.707 : 435.5568 ±0%
-starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataDynamic),iterations=1000)
-mean(starChains[,2]) # mean difference 106.8679
-quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(starChains[,4])# effect size estimite  1.572077
-quantile(starChains[,4]) # effect size  CI  
-cohen.d(formula = totalEarn ~ group, data = dataDynamic) #regular cohen's d   1.768504
-
-### Reward static ###
-
-rewardBF = ttestBF(formula = totalEarn ~ group, data = dataStatic)
-rewardBF ## [1] Alt., r=0.707 : 5370.592±0%
-starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataStatic),iterations=1000)
-mean(starChains[,2]) # mean difference  116.3409
-quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(starChains[,4])# effect size estimite 3.079063
-quantile(starChains[,4]) # effect size  CI  
-cohen.d(formula = totalEarn ~ group, data = dataStatic) #regular cohen's d  3.393819
-
-### Post-test all questions ###
-aggregate(data = data_sum, correct~group, FUN="mean")
-ttestBF(data=data_sum,formula =  correct~group)
-
-
-# Check for relationship between age and exploration within children
-dataChild<- data_sum %>% filter(group == "child")
-plot(dataChild$AgeYear,dataChild$explore)
-plot(dataChild$AgeYear,dataChild$switch)
-switchAgeBF<-lmBF(switch~AgeYear, dataChild)
-exploreAgeBF<-lmBF(explore~AgeYear, dataChild)
-
-
-# Check if children's answers to all of the questions were signifigantly above what chance would predict (Chance being 20%)
-ttestBF(dataChild$correct, mu=.2) #289493888445

@@ -152,8 +152,14 @@ mean(starChains[,2]) # mean difference 116.0546
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI 101.9744 131.4045 
 mean(starChains[,4])# effect size estimite 2.746324
 quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI 2.301249 3.208194 
+
+# Frequentist equivalent
+t.test(formula = totalEarn ~ group, data = data_sum) #t = 11.925, df = 54.2, p-value < 2.2e-16
+# 95% CI   97.27606 136.59177
+
 cohen.d(formula = totalEarn ~ group, data = data_sum) #regular cohen's d
 #d estimate: 2.78887 (large) 95 percent confidence interval: 2.337442 3.240299 
+
 
 # Switch to a more robust analysis procedure - let's try the Bayesian bootstrap
 

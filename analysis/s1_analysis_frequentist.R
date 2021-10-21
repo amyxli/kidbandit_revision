@@ -18,7 +18,6 @@ data_sum<-merge(data_sum,age_info, by.x="subjID")
 ##                    Analysis for switching and explore* and stars                ####
 ##              *Note that explore is called 'non-maximizing' in the paper           ##
 #-------------------------------------------------------------------------------------#
-library(BayesFactor)
 
 data_sum = data_sum[data_sum$group %in% c("child", "adult"),]
 data_sum$group = factor(data_sum$group)
@@ -81,6 +80,8 @@ dataChild<- data_sum %>% filter(group == "child")
 
 t.test(subset(dataChild, condition=="dynamic")$correct, mu=.2) 
 #t = 10.267, df = 14, p-value = 6.733e-08, CI  0.7063037 0.9736963
+
+
 t.test(subset(dataChild, condition=="static")$correct, mu=.2) 
 # data constant since everyone got 100%
 
@@ -100,15 +101,15 @@ summary(mod3)
 mod4<-glm(correct_8~switch+group, dataDynamic, family= "binomial")
 mod5<-glm(correct_8~explore+group, dataDynamic, family= "binomial")
 mod6<-glm(correct_8~switch+explore+group, dataDynamic, family= "binomial")
-all_mods<-c(mod1, mod2, mod3, mod4, mod5, mod6)
 
 # how much better is switch vs. group
-anova(mod1, mod3)
+anova(mod1, mod2, test = "LRT") # LR = 11.071
 # how much better is explore vs. group
-anova(mod2, mod3)
+anova(mod1, mod3, test = "LRT") # LR = 10.126
 
 # Comparing the child-only model to one that also includes switching
-anova(mod4, mod1, test = "LRT") #switch+group vs group-only.  0.000724 ***
+anova(mod1, mod4, test = "LRT") #switch+group vs group-only.  0.000724 ***
+anova(mod1, mod5, test = "LRT") #explore+group vs group-only. 0.001183 **
 
 # Check for relationship between age and exploration within children
 dataChild<- data_sum %>% filter(group == "child")

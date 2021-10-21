@@ -204,12 +204,8 @@ switchByBin<-aggregate(data = all_trials, switch~bin+subjID+group+condition, FUN
 
 # manuscript plot figure 2J
 plt<-ggplot(data = switchByBin, aes(x = bin, y = switch, group=bin, fill =group))+
-  #geom_line(aes(group=subjID), size=.74,color="black", alpha=.1)+
-  #geom_dotplot(binaxis='y', stackdir='centerwhole',dotsize=.7)+
   geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
-  # facet_grid(~condition, labeller=labeller(condition=cond.labs2))+
   facet_grid(condition~group, labeller=labeller(condition=cond.labs2, group = group.labs))+
-  #geom_jitter(width = .1, alpha = .2)+
   scale_fill_manual(values = c("#396AB1","#ed9523"))+
   theme_bw()+
   xlab("Trial")+

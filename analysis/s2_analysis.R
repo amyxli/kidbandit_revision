@@ -257,3 +257,75 @@ eight2
 # library(patchwork)
 (switch1|switch2)/(explore1|explore2)/(earn1|earn2)/(eight1|eight2)
 
+##########################################################
+#   Within-condition analysis for the figures         ####
+##########################################################
+
+dataDynamic <- data_sum %>% filter(condition == "dynamic")
+dataStatic <- data_sum %>% filter(condition == "static")
+
+### Switching Dynamic ###
+switchBF = ttestBF(formula = switch ~ group, data = dataDynamic)
+switchBF ## [1] Alt., r=0.707 : 2.803773e+13 ±0%
+
+switchChains= posterior(ttestBF(formula = switch ~ group, data = dataDynamic),iterations=1000)
+
+mean(switchChains[,2]) # mean difference  -0.579253
+quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
+mean(switchChains[,4])# effect size estimite -2.341969
+quantile(switchChains[,4]) # effect size  CI
+
+### Switching Static ###
+switchBF = ttestBF(formula = switch ~ group, data = dataStatic)
+switchBF ## [1] Alt., r=0.707 : 1.426302e+20 ±0%
+
+switchChains= posterior(ttestBF(formula = switch ~ group, data = dataStatic),iterations=1000)
+
+mean(switchChains[,2]) # mean difference  -0.6092656
+quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
+mean(switchChains[,4])# effect size estimite -3.860834
+quantile(switchChains[,4]) # effect size  CI
+
+### Non-max Dynamic ###
+exploreBF = ttestBF(formula = explore ~ group, data = dataDynamic)
+exploreBF ## [1] Alt., r=0.707 : 1.067564e+14 ±0%
+
+exploreChains= posterior(ttestBF(formula = explore ~ group, data = dataDynamic),iterations=1000)
+
+mean(exploreChains[,2]) # mean difference  -0.4729586
+quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
+
+mean(exploreChains[,4])# effect size estimite  -2.416524
+quantile(exploreChains[,4]) # effect size  CI
+
+### Non-max Static ###
+exploreBF = ttestBF(formula = explore ~ group, data = dataStatic)
+exploreBF ## [1] Alt., r=0.707 : 6.424851e+19 ±0%
+
+exploreChains= posterior(ttestBF(formula = explore ~ group, data = dataStatic),iterations=1000)
+
+mean(exploreChains[,2]) # mean difference -0.4687977
+quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
+
+mean(exploreChains[,4])# effect size estimite-3.812591
+quantile(exploreChains[,4]) # effect size  CI
+
+### Reward dynamic ###
+rewardBF = ttestBF(formula = totalEarn ~ group, data = dataDynamic)
+rewardBF ## [1] Alt., r=0.707 : 1.080903e+14 ±0%
+starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataDynamic),iterations=1000)
+mean(starChains[,2]) # mean difference 105.374
+quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
+mean(starChains[,4])# effect size estimite  2.396081
+quantile(starChains[,4]) # effect size  CI  
+
+### Reward static ###
+
+rewardBF = ttestBF(formula = totalEarn ~ group, data = dataStatic)
+rewardBF ## [1] Alt., r=0.707 : 4.486329e+18 ±0%
+starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataStatic),iterations=1000)
+mean(starChains[,2]) # mean difference  98.46568
+quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
+mean(starChains[,4])# effect size estimite 141.9224
+quantile(starChains[,4]) # effect size  CI  
+

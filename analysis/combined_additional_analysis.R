@@ -237,6 +237,14 @@ adultSwitch<- switchByBin %>% filter(group == "adult")
 lmBF(data=kidsSwitch, switch~bin) #bin : 0.5873183 ±0%
 lmBF(data=adultSwitch, switch~bin) #1.810572e+23 ±0.01%
 
+#* reported: figure #
+# kids only, by condition
+lmBF(data= subset(kidsSwitch, condition == "dynamic"), switch~bin) # [1] bin : 0.2886507 ±0%
+lmBF(data= subset(kidsSwitch, condition == "static"), switch~bin) # [1] bin : 0.54382 ±0%
+
+# adults only, by condition
+lmBF(data= subset(adultSwitch, condition == "dynamic"), switch~bin) # [1] bin : 29274.07 ±0%
+lmBF(data= subset(adultSwitch, condition == "static"), switch~bin) # [1] bin : 1.428513e+24 ±0%
 #-----------------------------------------------------------------------------------------##
 # visualisation of exploration (non-max + switch as conditionalised on change discovery ####
 #-----------------------------------------------------------------------------------------##

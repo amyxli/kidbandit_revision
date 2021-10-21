@@ -305,9 +305,9 @@ cohen.d(formula = explore ~ group, data = dataStatic) #regular cohen's d -1.3637
 
 ### Reward dynamic ###
 rewardBF = ttestBF(formula = totalEarn ~ group, data = dataDynamic)
-rewardBF ## [1] Alt., r=0.707 : 435.5568 ±0%
+rewardBF ## [1] Alt., r=0.707 : 433469.1 ±0%
 starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataDynamic),iterations=1000)
-mean(starChains[,2]) # mean difference 106.8679
+mean(starChains[,2]) # mean difference 112.0494
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
 mean(starChains[,4])# effect size estimite  1.572077
 quantile(starChains[,4]) # effect size  CI  
@@ -316,12 +316,11 @@ cohen.d(formula = totalEarn ~ group, data = dataDynamic) #regular cohen's d   1.
 ### Reward static ###
 
 rewardBF = ttestBF(formula = totalEarn ~ group, data = dataStatic)
-rewardBF ## [1] Alt., r=0.707 : 5370.592±0%
+rewardBF ## [1] Alt., r=0.707 : 12.04404 ±0%
 starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataStatic),iterations=1000)
-mean(starChains[,2]) # mean difference  116.3409
+mean(starChains[,2]) # mean difference  98.46568
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(starChains[,4])# effect size estimite 3.079063
+mean(starChains[,4])# effect size estimite 1.262611
 quantile(starChains[,4]) # effect size  CI  
-cohen.d(formula = totalEarn ~ group, data = dataStatic
 
 

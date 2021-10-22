@@ -333,59 +333,6 @@ adult_sum <- left_join(adult_sum, a_DiscoveryAll)
 data_sum<-rbind(child_sum,adult_sum)
 
 #######################################################################################
-##                                Basic descriptives plots                           ## 
-#######################################################################################
-
-## Switching
-switchPlot <- ggplot(
-  data_sum, 
-  aes(x = group, y = switch, fill = group)
-) +
-  geom_violin (alpha=.5) + ## change to violin
-  theme_bw()+
-  scale_fill_colorblind()+
-  labs  (x = "group", y = "switch prop", color = "group\n") +
-  facet_grid(~condition) +
-  theme(legend.position="none") +
-  stat_summary(fun.y=mean, geom="point", shape=23, size=4)
-
-## Exploratory choice
-explorePlot <- ggplot(
-  data_sum,
-  aes(x = group, y = explore, fill = group)
-) +
-  geom_violin (alpha=.5) +
-  theme_bw()+
-  scale_fill_colorblind()+
-  labs  (x = "group", y = "% 'explore' choices", color = "group\n") +
-  facet_grid(~condition) +
-  theme(legend.position="none") +
-  stat_summary(fun.y=mean, geom="point", shape=23, size=4)
-
-## Correct answers in static and dynamic
-correctPlot <-
-  ggplot(
-    data_sum,
-    aes(x = group, y = correct, fill=group)
-  ) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("prop correct posttest response") + 
-  xlab("Group") +
-  theme(legend.position="none") +
-  facet_grid(~condition)
-
-## Correct answers for 8 stars in dynamic
-propCorrect8 <- 
-  data_sum %>% 
-  filter(condition=="dynamic") %>% 
-  group_by(group) %>% 
-  summarise(mean(correct_8))
-
-
-
-#######################################################################################
 ##                                Total Stars Won                                    ## 
 #######################################################################################
 ## Children 

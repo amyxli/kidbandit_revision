@@ -163,29 +163,6 @@ pTA_2<-aggregate(data=stars2Adult, correct~subjID, FUN=identity)
 pTA_3<-aggregate(data=stars3Adult, correct~subjID, FUN=identity)
 pTA_6<-aggregate(data=stars6Adult, correct~subjID, FUN=identity)
 
-# Make new data frame with variable "question" (1, 2, 3, 6, or 8 star) and "correct"
-
-tmp <- postTestC %>% dplyr::select(c(subjID, group, condition, stimulus, correct)) 
-tmp <- tmp %>% rbind(postTestA %>% dplyr::select(c(subjID, group, condition, stimulus, correct)))
-
-tmp <- tmp %>% 
-  mutate(question = ifelse(grepl("1 star", stimulus), "1", 
-                           ifelse(grepl("2 stars", stimulus), "2",
-                                  ifelse(grepl("3 stars", stimulus), "3",
-                                         ifelse(grepl("6 stars", stimulus), "6",
-                                                ifelse(grepl("8 stars", stimulus), "8",
-                                                       NA))))))
-
-tmp$question <- as.factor(tmp$question)
-
-ggplot(data = tmp,
-       mapping = aes(
-         x = question,
-         y = correct, 
-         fill = group)
-       ) +
-  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5) +
-  facet_grid(~condition)
 
 #######################################################################################
 ##                         Change discovery in dynamic                               ## 

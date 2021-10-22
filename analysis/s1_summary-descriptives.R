@@ -112,47 +112,54 @@ trialsInfo <- trialsInfo %>% arrange(subjID, trial_index)
 #######################################################################################
 ##                                Posttest performance                               ## 
 #######################################################################################
-## largely same as Emily's code for 'posttest performance' section
 
 ## Children
 postTestC <- c %>%
-  filter(posttest == "correct" | posttest == "incorrect")
+  drop_na(posttest) %>%
+  filter(posttest != "posttest")
 
+postTestC$correct<-1
+postTestC$correct[postTestC$posttest=="incorrect"]<-0
 postTestC$group <- "child"
-postTestC$correct<-1 
-postTestC$correct[postTestC$posttest=="incorrect"]<-0 # if incorrect recode as correct = 0
-# stars8Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
+stars8Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
+stars1Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>1 star</b>?</p>",]
+stars2Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>2 stars</b>?</p>",]
+stars3Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>3 stars</b>?</p>",]
+stars6Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>6 stars</b>?</p>",]
+
+
+
+pTC_correct<-aggregate(data=postTestC, correct~subjID, FUN=mean)
+pTC_8<-aggregate(data=stars8Child, correct~subjID, FUN=identity)
+pTC_1<-aggregate(data=stars1Child, correct~subjID, FUN=identity)
+pTC_2<-aggregate(data=stars2Child, correct~subjID, FUN=identity)
+pTC_3<-aggregate(data=stars3Child, correct~subjID, FUN=identity)
+pTC_6<-aggregate(data=stars6Child, correct~subjID, FUN=identity)
+
 
 ## adults
 postTestA <- a %>%
-  filter(posttest == "correct" | posttest == "incorrect")
+  drop_na(posttest) %>%
+  filter(posttest != "posttest")
 
 postTestA$group <- "adult"
 postTestA$correct<-1
 postTestA$correct[postTestA$posttest=="incorrect"]<-0
-# stars8Adult<-postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
-# 
-# pTA_correct<-aggregate(data=postTestA, correct~subjID, FUN=mean)
-# pTA_8<-aggregate(data=stars8Adult, correct~subjID, FUN=identity)
 
-# Make new data frame with variable "question" (1, 2, 3, 6, or 8 star) and "correct"
+stars8Adult<-postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
+stars1Adult <- postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>1 star</b>?</p>",]
+stars2Adult <- postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>2 stars</b>?</p>",]
+stars3Adult <- postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>3 stars</b>?</p>",]
+stars6Adult <- postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>6 stars</b>?</p>",]
 
-tmp <- postTestC %>% 
-  dplyr::select(c(subjID, group, condition, stimulus, correct))
 
-# select only relevant columns from adult data, then rbind with child data
+pTA_correct<-aggregate(data=postTestA, correct~subjID, FUN=mean)
+pTA_8<-aggregate(data=stars8Adult, correct~subjID, FUN=identity)
+pTA_1<-aggregate(data=stars1Adult, correct~subjID, FUN=identity)
+pTA_2<-aggregate(data=stars2Adult, correct~subjID, FUN=identity)
+pTA_3<-aggregate(data=stars3Adult, correct~subjID, FUN=identity)
+pTA_6<-aggregate(data=stars6Adult, correct~subjID, FUN=identity)
 
-tmp <- tmp %>% rbind(postTestA %>% dplyr::select(c(subjID, group, condition, stimulus, correct))) 
-
-tmp <- tmp %>%
-  mutate(question = ifelse(grepl("1 star", stimulus), "1 star",
-                           ifelse(grepl("2 stars", stimulus), "2 stars",
-                                  ifelse(grepl("3 stars", stimulus), "3 stars",
-                                         ifelse(grepl("6 stars", stimulus), "6 stars",
-                                                ifelse(grepl("8 stars", stimulus), "8 stars",
-                                                       NA))))))
-
-write.csv(here("data_tidy", "study1_posttest.csv"))
 #######################################################################################
 ##                         Change discovery in dynamic                               ## 
 #######################################################################################
@@ -282,17 +289,48 @@ trialsInfo <- left_join(trialsInfo, tmp)
 child_sum <- merge(c_switch,pTC_correct, by = "subjID")
 colnames(pTC_8)[colnames(pTC_8)=="correct"]<-"correct_8"
 child_sum <- merge(child_sum, pTC_8, by="subjID")
+
+child_sum <- merge(c_switch,pTC_correct, by = "subjID")
+colnames(pTC_8)[colnames(pTC_8)=="correct"]<-"correct_8"
+colnames(pTC_1)[colnames(pTC_1)=="correct"]<-"correct_1"
+colnames(pTC_2)[colnames(pTC_2)=="correct"]<-"correct_2"
+colnames(pTC_3)[colnames(pTC_3)=="correct"]<-"correct_3"
+colnames(pTC_6)[colnames(pTC_6)=="correct"]<-"correct_6"
+
+
+child_sum <- merge(child_sum, pTC_8, by="subjID")
+child_sum <- merge(child_sum, pTC_1, by="subjID")
+child_sum <- merge(child_sum, pTC_2, by="subjID")
+child_sum <- merge(child_sum, pTC_3, by="subjID")
+child_sum <- merge(child_sum, pTC_6, by="subjID")
+child_posttest<-child_sum
+
 child_sum <- left_join(child_sum, c_explore)
 child_sum <- left_join(child_sum, c_DiscoveryAll)
 
 adult_sum<-merge(a_switch,pTA_correct, by = "subjID")
 colnames(pTA_8)[colnames(pTA_8)=="correct"]<-"correct_8"
 adult_sum <- merge(adult_sum, pTA_8, by="subjID")
+
+colnames(pTA_1)[colnames(pTA_1)=="correct"]<-"correct_1"
+colnames(pTA_2)[colnames(pTA_2)=="correct"]<-"correct_2"
+colnames(pTA_3)[colnames(pTA_3)=="correct"]<-"correct_3"
+colnames(pTA_6)[colnames(pTA_6)=="correct"]<-"correct_6"
+adult_sum <- merge(adult_sum, pTA_1, by="subjID")
+adult_sum <- merge(adult_sum, pTA_2, by="subjID")
+adult_sum <- merge(adult_sum, pTA_3, by="subjID")
+adult_sum <- merge(adult_sum, pTA_6, by="subjID")
+adult_posttest<-adult_sum
+
+all_posttest<-rbind(child_posttest,adult_posttest)
+all_posttest<-as.data.frame(all_posttest)
+
+# write.csv(all_posttest,here("data_tidy", "study1_posttest.csv"))
+
 adult_sum <- left_join(adult_sum, a_explore)
 adult_sum <- left_join(adult_sum, a_DiscoveryAll)
 
 data_sum<-rbind(child_sum,adult_sum)
-
 
 #######################################################################################
 ##                                Basic descriptives plots                           ## 

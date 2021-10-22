@@ -116,27 +116,43 @@ trialsInfo <- trialsInfo %>% arrange(subjID, trial_index)
 
 ## Children
 postTestC <- c %>%
-  drop_na(posttest) %>%
-  filter(posttest != "posttest")
+  filter(posttest == "correct" | posttest == "incorrect")
 
 postTestC$group <- "child"
-postTestC$correct<-1
-postTestC$correct[postTestC$posttest=="incorrect"]<-0
-stars8Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
+postTestC$correct<-1 
+postTestC$correct[postTestC$posttest=="incorrect"]<-0 # if incorrect recode as correct = 0
+# stars8Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
 
 ## adults
 postTestA <- a %>%
-  drop_na(posttest) %>%
-  filter(posttest != "posttest")
+  filter(posttest == "correct" | posttest == "incorrect")
 
 postTestA$group <- "adult"
 postTestA$correct<-1
 postTestA$correct[postTestA$posttest=="incorrect"]<-0
-stars8Adult<-postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
+# stars8Adult<-postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
+# 
+# pTA_correct<-aggregate(data=postTestA, correct~subjID, FUN=mean)
+# pTA_8<-aggregate(data=stars8Adult, correct~subjID, FUN=identity)
 
-pTA_correct<-aggregate(data=postTestA, correct~subjID, FUN=mean)
-pTA_8<-aggregate(data=stars8Adult, correct~subjID, FUN=identity)
+# Make new data frame with variable "question" (1, 2, 3, 6, or 8 star) and "correct"
 
+tmp <- postTestC %>% 
+  dplyr::select(c(subjID, group, condition, stimulus, correct))
+
+# select only relevant columns from adult data, then rbind with child data
+
+tmp <- tmp %>% rbind(postTestA %>% dplyr::select(c(subjID, group, condition, stimulus, correct))) 
+
+tmp <- tmp %>%
+  mutate(question = ifelse(grepl("1 star", stimulus), "1 star",
+                           ifelse(grepl("2 stars", stimulus), "2 stars",
+                                  ifelse(grepl("3 stars", stimulus), "3 stars",
+                                         ifelse(grepl("6 stars", stimulus), "6 stars",
+                                                ifelse(grepl("8 stars", stimulus), "8 stars",
+                                                       NA))))))
+
+write.csv(here("data_tidy", "study1_posttest.csv"))
 #######################################################################################
 ##                         Change discovery in dynamic                               ## 
 #######################################################################################

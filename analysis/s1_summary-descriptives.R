@@ -124,9 +124,6 @@ postTestC$correct<-1
 postTestC$correct[postTestC$posttest=="incorrect"]<-0
 stars8Child <- postTestC[postTestC$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
 
-pTC_correct<-aggregate(data=postTestC, correct~subjID, FUN=mean)
-pTC_8<-aggregate(data=stars8Child, correct~subjID, FUN=identity)
-
 ## adults
 postTestA <- a %>%
   drop_na(posttest) %>%
@@ -136,7 +133,6 @@ postTestA$group <- "adult"
 postTestA$correct<-1
 postTestA$correct[postTestA$posttest=="incorrect"]<-0
 stars8Adult<-postTestA[postTestA$stimulus=="Which, if any, of these monsters ever gave you <b>8 stars</b>?</p>",]
-
 
 pTA_correct<-aggregate(data=postTestA, correct~subjID, FUN=mean)
 pTA_8<-aggregate(data=stars8Adult, correct~subjID, FUN=identity)
@@ -280,6 +276,7 @@ adult_sum <- left_join(adult_sum, a_explore)
 adult_sum <- left_join(adult_sum, a_DiscoveryAll)
 
 data_sum<-rbind(child_sum,adult_sum)
+
 
 #######################################################################################
 ##                                Basic descriptives plots                           ## 

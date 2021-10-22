@@ -36,7 +36,7 @@ switchChains= posterior(ttestBF(formula = switch ~ group, data = data_sum),itera
 
 mean(switchChains[,2]) # mean difference
 quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(switchChains[,4])# effect size estimite
+mean(switchChains[,4])# effect size estimate
 quantile(switchChains[,4],probs=c(0.025,0.975)) # effect size  CI
 
 ############################# 'Explore' choices #############################
@@ -51,7 +51,7 @@ exploreChains= posterior(ttestBF(formula = explore ~ group, data = data_sum),ite
 
 mean(exploreChains[,2]) # mean difference 
 quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(exploreChains[,4])# effect size estimite
+mean(exploreChains[,4])# effect size estimate
 quantile(exploreChains[,4],probs=c(0.025,0.975)) # effect size  CI
 
 ################################ Stars Won ################################
@@ -67,7 +67,7 @@ starChains= posterior(ttestBF(formula = totalEarn ~ group, data = data_sum),iter
 mean(starChains[,2]) # mean difference 113.5538
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI 79.84202 147.55122 
 
-mean(starChains[,4])# effect size estimite 2.006812
+mean(starChains[,4])# effect size estimate 2.006812
 quantile(starChains[,4],probs=c(0.025,0.975)) # effect size  CI 1.294476 2.714886 
 
 #-------------------------------------------------------------------------------------#
@@ -157,7 +157,9 @@ dataChild<- data_sum %>% filter(group == "child")
 plot(dataChild$AgeYear,dataChild$explore)
 plot(dataChild$AgeYear,dataChild$switch)
 switchAgeBF<-lmBF(switch~AgeYear, dataChild)
+switchAgeBF # AgeYear : 1.141046 ±0%
 exploreAgeBF<-lmBF(explore~AgeYear, dataChild)
+exploreAgeBF # AgeYear : 1.438597 ±0%
 
 ##################################
 #####   DATA VIZ FOR PAPER    ####
@@ -263,7 +265,7 @@ switchChains= posterior(ttestBF(formula = switch ~ group, data = dataDynamic),it
 
 mean(switchChains[,2]) # mean difference  -0.6894053
 quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(switchChains[,4])# effect size estimite -3.155044
+mean(switchChains[,4])# effect size estimate -3.155044
 quantile(switchChains[,4]) # effect size  CI
 
 ### Switching Static ###
@@ -274,7 +276,7 @@ switchChains= posterior(ttestBF(formula = switch ~ group, data = dataStatic),ite
 
 mean(switchChains[,2]) # mean difference  -0.5469376
 quantile(switchChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(switchChains[,4])# effect size estimite -2.282956
+mean(switchChains[,4])# effect size estimate -2.282956
 quantile(switchChains[,4]) # effect size  CI
 
 ### Non-max Dynamic ###
@@ -286,7 +288,7 @@ exploreChains= posterior(ttestBF(formula = explore ~ group, data = dataDynamic),
 mean(exploreChains[,2]) # mean difference  -0.5446166
 quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
 
-mean(exploreChains[,4])# effect size estimite  -3.213626
+mean(exploreChains[,4])# effect size estimate  -3.213626
 quantile(exploreChains[,4]) # effect size  CI
 
 ### Non-max Static ###
@@ -298,7 +300,7 @@ exploreChains= posterior(ttestBF(formula = explore ~ group, data = dataStatic),i
 mean(exploreChains[,2]) # mean difference -0.3046656
 quantile(exploreChains[,2],probs=c(0.025,0.975)) # mean difference CI
 
-mean(exploreChains[,4])# effect size estimite -1.092418
+mean(exploreChains[,4])# effect size estimate -1.092418
 quantile(exploreChains[,4]) # effect size  CI
 cohen.d(formula = explore ~ group, data = dataStatic) #regular cohen's d -1.363703 
 
@@ -309,7 +311,7 @@ rewardBF ## [1] Alt., r=0.707 : 433469.1 ±0%
 starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataDynamic),iterations=1000)
 mean(starChains[,2]) # mean difference 112.0494
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(starChains[,4])# effect size estimite  1.572077
+mean(starChains[,4])# effect size estimate  1.572077
 quantile(starChains[,4]) # effect size  CI  
 cohen.d(formula = totalEarn ~ group, data = dataDynamic) #regular cohen's d   1.768504
 
@@ -320,7 +322,7 @@ rewardBF ## [1] Alt., r=0.707 : 12.04404 ±0%
 starChains= posterior(ttestBF(formula = totalEarn ~ group, data = dataStatic),iterations=1000)
 mean(starChains[,2]) # mean difference  98.46568
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI
-mean(starChains[,4])# effect size estimite 1.262611
+mean(starChains[,4])# effect size estimate 1.262611
 quantile(starChains[,4]) # effect size  CI  
 
 

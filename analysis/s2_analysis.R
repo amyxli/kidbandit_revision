@@ -151,8 +151,8 @@ exploregroupBF<-lmBF(correct_8~explore+group, dataDynamic)
 segBF<-lmBF(correct_8~switch+explore+group, dataDynamic)
 allBF<-c(switchBF,exploreBF,groupBF,switchgroupBF,exploregroupBF,segBF)
 
-allBF[1]/allBF[3] # How much better switch is than group
-allBF[2]/allBF[3] # How much better explore is than group
+allBF[1]/allBF[3] # How much better switch is than group [1] switch : 70239.28 ±0.01%
+allBF[2]/allBF[3] # How much better explore is than group [1] explore : 8678.091 ±0.01%
 
 # Comparing the child-only model to one that also includes switching
 allBF[4]/allBF[3] # switch+group vs group-only. 
@@ -163,7 +163,9 @@ dataChild<- data_sum %>% filter(group == "child")
 plot(dataChild$AgeYear,dataChild$explore)
 plot(dataChild$AgeYear,dataChild$switch)
 switchAgeBF<-lmBF(switch~AgeYear, dataChild)
-exploreAgeBF<-lmBF(explore~AgeYear, dataChild)
+switchAgeBF # AgeYear : 0.4546462 ±0%
+
+exploreAgeBF<-lmBF(explore~AgeYear, dataChild) # [1] AgeYear : 0.3908611 ±0%
 
 ####################################################################
 #####                   DATA VIZ FOR PAPER                      ####

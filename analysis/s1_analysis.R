@@ -90,18 +90,23 @@ dataDynamic %>%     #* reported: paper*#
 
 # group `mean(correct_8)`
 # <fct>             <dbl>
-# 1 adult           0.333
-# 2 child           0.933
+# 1 adult             0.2  
+# 2 child             0.933
 
 dynamic <- xtabs( ~ correct_8 + group, dataDynamic ) #* reported: paper*#
 contingencyTableBF(dynamic,sampleType = "poisson") 
-# Bayesian test of association Non-indep. (a=1) : 276.4305 ±0%
+# Bayesian test of association Non-indep. (a=1) : 3999.736 ±0%
 # in favor of a relationship between age group and answers to this question
 
 ###      Overall      ####
 
 # mean prop overall correct in posttest
 aggregate(data = data_sum, correct~ condition + group, FUN = "mean") #* reported: paper*#
+# condition group   correct
+# 1   dynamic adult 0.7200000
+# 2    static adult 0.8444444
+# 3   dynamic child 0.8400000
+# 4    static child 1.0000000
 
 # mean for study 1, dynamic, adults, EXCLUDING 8-star question
 study1post <- read_csv(here("data_tidy","study1_posttest.csv"))[-1]
@@ -123,7 +128,7 @@ tmp <- subset(study1post_long, question != "8 stars" & group == "adult" & condit
   summarise(correctProp = mean(correct)) %>%
   ungroup() 
 
-tmp$correctProp %>% mean()
+tmp$correctProp %>% mean() # [1] 0.85
 
 # t-test for children vs. chance, by condition
 dataChild<- data_sum %>% filter(group == "child")
@@ -136,20 +141,20 @@ ttestBF(subset(dataChild, condition=="static")$correct, mu=.2) # data constant s
 ##################################
 dataDynamic$group<-as.factor(dataDynamic$group)
 
-groupBF<-lmBF(correct_8~group, dataDynamic) #* reported: paper*# group : 100.4961 ±0%
-switchBF<-lmBF(correct_8~switch, dataDynamic)  # switch: 1705.60
-exploreBF<-lmBF(correct_8~explore, dataDynamic) # explore: 1233.116 ±0%
+groupBF<-lmBF(correct_8~group, dataDynamic) #* reported: paper*# group : 4489.353 ±0%
+switchBF<-lmBF(correct_8~switch, dataDynamic)  # switch: 462526.5 ±0.01%
+exploreBF<-lmBF(correct_8~explore, dataDynamic) # explore : 221674.8 ±0.01%
 
 switchgroupBF<-lmBF(correct_8~switch+group, dataDynamic)
 exploregroupBF<-lmBF(correct_8~explore+group, dataDynamic)
 segBF<-lmBF(correct_8~switch+explore+group, dataDynamic)
 allBF<-c(switchBF,exploreBF,groupBF,switchgroupBF,exploregroupBF,segBF)
 
-allBF[1]/allBF[3] #* reported How much better switch is than group
-allBF[2]/allBF[3] #* reported How much better explore is than group
+allBF[1]/allBF[3] #* reported How much better switch is than group 103.0274 ±0.01%
+allBF[2]/allBF[3] #* reported How much better explore is than group 49.37789 ±0.01%
 
 # Comparing the child-only model to one that also includes switching
-allBF[4]/allBF[3] #*reported switch+group vs group-only. 
+allBF[4]/allBF[3] #*reported switch+group vs group-only.  70.82535 ±1.08%
 
 # Check for relationship between age and exploration within children
 dataChild<- data_sum %>% filter(group == "child")

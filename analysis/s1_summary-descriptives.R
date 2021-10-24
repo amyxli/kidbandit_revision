@@ -140,9 +140,11 @@ pTC_6<-aggregate(data=stars6Child, correct~subjID, FUN=identity)
 ## adults
 postTestA <- a %>%
   drop_na(posttest) %>%
-  filter(posttest != "posttest" & posttest != "\\" & posttest != "posttest\\") # some weird thing happened in data writing
+  filter(posttest != "posttest" & posttest != "\\" & posttest != "posttest\\") 
+# some weird thing happened in data writing for the adults such that there were random backslashes
+# remove these rows
 
-postTestA$posttest <- str_remove(postTestA$posttest, "\\\\") # remove trailing backslashes
+postTestA$posttest <- str_remove(postTestA$posttest, "\\\\") # remove trailing backslashes from posttest correct data
 
 postTestA$group <- "adult"
 postTestA$correct<-1

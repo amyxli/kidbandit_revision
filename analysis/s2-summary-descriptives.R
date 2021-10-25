@@ -139,8 +139,6 @@ pTC_2<-aggregate(data=stars2Child, correct~subjID, FUN=identity)
 pTC_3<-aggregate(data=stars3Child, correct~subjID, FUN=identity)
 pTC_6<-aggregate(data=stars6Child, correct~subjID, FUN=identity)
 
-
-
 ## adults
 postTestA <- a %>%
   drop_na(posttest) %>%
@@ -328,7 +326,7 @@ adult_posttest<-adult_sum
 
 all_posttest<-rbind(child_posttest,adult_posttest)
 all_posttest<-as.data.frame(all_posttest)
-#write.csv(all_posttest,"study2_posttest.csv")
+# write.csv(all_posttest,"study2_posttest_v2.csv")
 
 adult_sum <- left_join(adult_sum, a_explore)
 adult_sum <- left_join(adult_sum, a_DiscoveryAll)

@@ -245,9 +245,14 @@ lmBF(data= subset(kidsSwitch, condition == "static"), switch~bin) # [1] bin : 0.
 # adults only, by condition
 lmBF(data= subset(adultSwitch, condition == "dynamic"), switch~bin) # [1] bin : 29274.07 ±0%
 lmBF(data= subset(adultSwitch, condition == "static"), switch~bin) # [1] bin : 1.428513e+24 ±0%
+
 #-----------------------------------------------------------------------------------------##
-# visualisation of exploration (non-max + switch as conditionalised on change discovery ####
+#                    Follow-up analyses to address reviewer comments                    ####
 #-----------------------------------------------------------------------------------------##
+
+#--------------------------------------------------------------------------------------    -#
+## visualisation of exploration (non-max + switch as conditionalised on change discovery ####
+#--------------------------------------------------------------------------------------    -#
 
 dynamicTrials  # dynamic condition data only, since that's condition where change happens
 
@@ -346,6 +351,28 @@ combinedPost_long <- combinedPost %>%
 combinedPost_long$question <- ifelse(combinedPost_long$question == "1", paste0(combinedPost_long$question, " star"), # if "1" then "1 star"
                                      paste0(combinedPost_long$question, " stars")) # if not "1" then "X stars" (e.g., "8 stars")
 
+# plot of correct post-test broken down by condition and group
+ggplot(data = combinedPost_long,
+       mapping = aes(x = group, 
+                     y = correct,
+                     fill = group)
+) +
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
+  scale_fill_manual(values = c("#396AB1","#ed9523"))+
+  theme_bw()+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+   #error bar
+  #  scale_x_discrete(breaks = c(0,1), labels = c("Trials 1-40", "Trials 41-80"))+
+  theme(axis.text.y = element_text(face="bold", size=12))+
+  theme(axis.text.x = element_text(face="bold", size=12))+
+  theme(legend.position = c("none"))+
+  ylim(0,1)+
+  ylab("Proportion of correct \n post-test answers")+
+  xlab(" ")+
+  theme(text = element_text(size=20))+
+  facet_grid(~condition) 
+
+aggregate(data=combinedPost_long, correct~group+condition, FUN=mean)
+
 # plot of correct post-test broken down by monster question
 ggplot(data = combinedPost_long,
        mapping = aes(x = question, 
@@ -366,4 +393,11 @@ ggplot(data = combinedPost_long,
   theme(text = element_text(size=20))+
   facet_grid(group~condition) +
   labs(x = "Question")
+
+# between age groups, within static
+ttestBF(formula = correct ~ group, data = subset(combinedPost_long, condition == "static")) # [1] Alt., r=0.707 : 12.57729 ±0%
+
+starChains=posterior(ttestBF(formula = correct ~ group, data = subset(combinedPost_long, condition == "static")),iterations=1000)
+quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI -0.16824149 -0.03370975 
+mean(starChains[,4])# effect size estimate -0.3152009
 

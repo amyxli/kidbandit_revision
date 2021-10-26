@@ -99,8 +99,8 @@ contingencyTableBF(dynamic,sampleType = "poisson")
 aggregate(data = data_sum, correct~ condition + group, FUN = "mean") #* reported: paper*#
 
 #  across both conditions
-subset(data_sum, group == "child")$correct %>% mean() #* reported: paper*#
-subset(data_sum, group == "adult")$correct %>% mean() #* reported: paper*#
+subset(data_sum, group == "child")$correct %>% mean() #* reported: paper*# 0.864
+subset(data_sum, group == "adult")$correct %>% mean() #* reported: paper*#  0.7756522
 
 # mean for study 2, dynamic, adults, EXCLUDING 8-star question
 study2post <- read_csv(here("data_tidy","study2_posttest.csv"))[-1]  
@@ -122,13 +122,7 @@ tmp <- subset(study2post_long, question != "8 stars" & group == "adult" & condit
   summarise(correctProp = mean(correct)) %>%
   ungroup() 
 
-tmp$correctProp %>% mean()
-
-# t-test for children vs. chance, by condition
-dataChild<- data_sum %>% filter(group == "child")
-
-ttestBF(subset(dataChild, condition=="dynamic")$correct, mu=.2) #*reported: paper* r=0.707 : 2.309175e+14 ±0%
-ttestBF(subset(dataChild, condition=="static")$correct, mu=.2) # Alt., r=0.707 : 3633821279 ±0%
+tmp$correctProp %>% mean() # 0.7209302
 
 ##################################
 #####      LINEAR MODELS      ####

@@ -41,15 +41,19 @@ all_trials <- all_trials %>%
 
 # add column coding if choice was the "best" one possible
 all_trials <- all_trials %>%
-  mutate(best = ifelse(trial < 41 & earnedThis == 6, 1,
-                       ifelse(trial >= 41 & condition == "static" & earnedThis == 6 ,1,
-                              ifelse(trial >= 41 & condition == "dynamic" & earnedThis == 8, 1, 0))))
+  mutate(best = ifelse(trial < 41 & earnedThis == 6, 1, # regardless of condition, best option in 1st half of study gave 6 stars
+                       ifelse(trial >= 41 & condition == "static" & earnedThis == 6 ,1, # in static, 2nd half best option gave 6 stars
+                              ifelse(trial >= 41 & condition == "dynamic" & earnedThis == 8, 1, 0)))) # in dynamic, 2nd half best option gave 8 stars
 
 # add trial bins <-  every 20 trials
 bins<- 20 #How many trials per bin - 20 trials
 all_trials$bin<-floor((all_trials$trial-1)/bins) # make a new column
 bestByBin<-aggregate(data = all_trials, best~bin+subjID+group+condition, FUN = "mean") # prop "best choices" by bin
 rewByBin<-aggregate(data = all_trials, earnedThis~bin+subjID+group+condition, FUN = "sum") # stars earned by bin
+
+binFine <- 10 #How many trials per bin - 20 trials
+all_trials$binFine<-floor((all_trials$trial-1)/binFine) # make a new column
+bestByBinFine<-aggregate(data = all_trials, best~binFine+subjID+group+condition, FUN = "mean") # prop "best choices" by bin of 10
 
 # add trial "halves"
 half<- 40 #How many trials per bin
@@ -76,25 +80,12 @@ names(status.labs) <- c(0, 1)
 # visualisation of "best" choices ####
 #------------------------------------#
 
-# for both static and dynamic conditions
-prop_best_all <-aggregate(data = all_trials, best~half+subjID+group+condition, FUN = "mean")
-
-# Proportion of "best" choices
-ggplot(
-  prop_best_all,
-  aes(x = group, y = best, fill=group)
-) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("prop best choices") + 
-  xlab("Group") +
-  theme(legend.position="none") +
-  facet_wrap(~condition+half)
+# for both static and dynamic conditions, prop best by halves
+prop_best_all <-aggregate(data = all_trials, best~half+subjID+group+condition+status, FUN = "mean")
 
 # Plot frequency of people who chose best option in dynamic, trials 41-80
+prop_best_dyn<-aggregate(data = dynamicTrials, best~half+subjID+group+status, FUN = "mean") # dynamic only, both halves
 
-prop_best_dyn<-aggregate(data = dynamicTrials, best~half+subjID+group, FUN = "mean") # dynamic only, both halves
 prop_best_dyn$half<-as.factor(prop_best_dyn$half)
 
 tmp <- subset(prop_best_dyn, half == 1) # data for dynamic, trials 41-80
@@ -115,7 +106,9 @@ tmp <- tmp %>% mutate(prop_best_lvl = ifelse(best <= 0.2, 1,
 tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
 
 ## now count how many adults vs kids in each bin
-tabyl(tmp, group, prop_best_lvl)
+tabyl(tmp, group, prop_best_lvl) # not conditionalised on discovery status
+
+tabyl(subset(tmp, status == 1), group, prop_best_lvl) # discovered only
 
 # manuscript plot figure 2I: proportion of time choosing the best monster,
 # both static and dynamic, broken down by halves of experiment
@@ -142,6 +135,28 @@ plt<- ggplot(data= prop_best_all, aes(x=as.factor(half), y = best, fill=group, g
 plt
 
 # ggsave(here("plots", "propBest.png"), width = 13.15, height = 5.86)
+
+# manuscript plot figure 2I: but with people who discovered ONLY
+tmp <- subset(prop_best_all, status == 1)
+
+ggplot(data= tmp, aes(x=as.factor(half), y = best, fill=group, group=group))+
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = .85, color="black", alpha=.5)+
+  scale_fill_manual(values = c("#396AB1","#ed9523"), name = "", labels = c("Adults", "Children"))+
+  theme_bw()+
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.85))+   #error bar
+  ylim(0,1)+
+  ylab("Proportion of time \n choosing the best monster")+
+  xlab(" ")+
+  scale_x_discrete(breaks = c(0,1), labels = c("Trials 1-40", "Trials 41-80")) +
+  theme(strip.text.x = element_text(size = 28),
+        strip.text.y = element_text(size = 28),
+        axis.title.y = element_text(size = 28, angle = 90),
+        axis.title.x = element_text(size = 28),
+        axis.text.x = element_text(size=24),
+        axis.text.y = element_text(size=24),
+        legend.text = element_text(size=24),
+        text = element_text(size=20)) +
+  facet_wrap(~condition, labeller=labeller(condition=cond.labs)) 
 
 #-------------------------------------#
 # analysis of prop. "best" choices ####
@@ -279,7 +294,7 @@ ggplot(
 # non-maximising (explore) choices, grouped by status (did they discover 8-star?) and age group
 nonMax_StatusBin<-aggregate(data = dynamicTrials, explore~bin+subjID+group+status, FUN = "mean",na.rm=TRUE)
 
-ggplot(data = nonMax_StatusBin, aes(x = bin, y = explore, group=bin, fill =group))+
+plt <-ggplot(data = nonMax_StatusBin, aes(x = bin, y = explore, group=bin, fill =group))+
   geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
   facet_grid(status~group, labeller=labeller(status=status.labs, group = group.labs))+
   scale_fill_manual(values = c("#396AB1","#ed9523"))+
@@ -323,6 +338,83 @@ ggplot(data = switch_StatusBin, aes(x = bin, y = switch, group=bin, fill =group)
 
 # ggsave(here("plots", "switch_byStatusBin.png"), width = 14.3, height = 7.46)
 
+#-----------------------------------------------------------#
+##                people's 1st 8-star trial ####
+#-----------------------------------------------------------#
+
+# out of people who discovered, what was their first 8-star trial?
+tmp <- dynamicTrials %>% 
+  dplyr::select(c(subjID, group, condition, status, time)) %>%
+  unique() %>%
+  filter(status == 1 & condition == "dynamic")
+  
+ggplot(tmp, aes(time, colour = group, fill = group)) +
+  geom_density(alpha = 0.1) +
+  labs(x = "trial discovered", y = "prop participants in group")
+
+ggplot(tmp) +
+  geom_freqpoly(aes(x = time, colour = group, fill = group),
+                 binwidth = 1)
+  
+
+# plot 6-star choices by halves
+
+oldBestHalf <- aggregate(data = tmp, oldBest~half+subjID+group+status, FUN = "mean",na.rm=TRUE)
+
+ggplot(data = oldBestHalf, aes(x = half, y = oldBest, group=half, fill =group))+
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
+  facet_grid(status~group, labeller=labeller(status=status.labs, group = group.labs))+
+  scale_fill_manual(values = c("#396AB1","#ed9523"))+
+  theme_bw()+
+  xlab("Trial")+
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = c(0, 1),
+                     labels = c("1-40", "41-80"))+ 
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
+  theme(axis.text.y = element_text(size=18), strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 20),
+        axis.title.y = element_text(size = 20, angle = 90),
+        axis.title.x = element_text(size = 20),
+        axis.text.x = element_text(size=18))+
+  ylab("Proportion of 6-star choices")+
+  ylim(0,1)
+
+## get group means
+aggregate(data = tmp, oldBest~half+group+status, FUN = "mean",na.rm=TRUE)
+
+# plot 6-star choices by bins
+
+oldBestBin<- aggregate(data = tmp, oldBest~bin+subjID+group+status, FUN = "mean",na.rm=TRUE)
+
+ggplot(data = oldBestBin, aes(x = half, y = oldBest, group=bin, fill =group))+
+  geom_bar(stat = "summary", fun.y = "mean", position="dodge", width = 0.9, color="black", alpha=.5)+
+  facet_grid(status~group, labeller=labeller(status=status.labs, group = group.labs))+
+  scale_fill_manual(values = c("#396AB1","#ed9523"))+
+  theme_bw()+
+  xlab("Trial")+
+  theme(legend.position = "none") +
+  scale_x_continuous(breaks = c(0, 1, 2, 3),
+                     labels = c("1-20", "21-40", "41-60", "61-80"))+ 
+  stat_summary(fun.data="mean_cl_boot", geom="errorbar", aes(width=0.1), position=position_dodge(.9))+  #error bar
+  theme(axis.text.y = element_text(size=18), strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 20),
+        axis.title.y = element_text(size = 20, angle = 90),
+        axis.title.x = element_text(size = 20),
+        axis.text.x = element_text(size=18))+
+  ylab("Proportion of 6-star choices")+
+  ylim(0,1)
+
+#-----------------------------------------------------------#
+##                  dynamic: 6-star persisters           ####
+#-----------------------------------------------------------#
+
+tmp <- dynamicTrials  %>%
+  mutate(oldBest = ifelse(trial < 41 & earnedThis == 6, 1, # 1st half and picked 6-star
+                          ifelse(trial> 40 & earnedThis == 6, 1, # 2nd half and picked 6-star
+                                 0))) %>%
+  dplyr::select(subjID, condition, group, study, trial, status, time, earnedThis, bin, binFine, half, best, oldBest)
+
+
 #--------------------------------------------------------------------#
 ##                  Post-test combined analysis                   ####
 #--------------------------------------------------------------------#
@@ -352,7 +444,7 @@ combinedPost_long$question <- ifelse(combinedPost_long$question == "1", paste0(c
                                      paste0(combinedPost_long$question, " stars")) # if not "1" then "X stars" (e.g., "8 stars")
 
 # plot of correct post-test broken down by condition and group
-ggplot(data = combinedPost_long,
+ggplot(data = combinedPost,
        mapping = aes(x = group, 
                      y = correct,
                      fill = group)
@@ -371,7 +463,16 @@ ggplot(data = combinedPost_long,
   theme(text = element_text(size=20))+
   facet_grid(~condition) 
 
-aggregate(data=combinedPost_long, correct~group+condition, FUN=mean)
+# Means across all 5 posttest Q's
+aggregate(data=combinedPost, correct~group+condition, FUN=mean)
+
+# Dynamic only, Means across Q's excluding 8-star
+tmp <- subset(combinedPost_long, question != "8 stars" & condition == "dynamic") %>% # exclude the 8-star question
+  group_by(subjID, condition, group, study) %>% 
+  summarise(correctProp = mean(correct)) %>% # calculate mean prop correct for each subject
+  ungroup() 
+
+aggregate(data=tmp, correctProp~group+condition, FUN=mean)
 
 # plot of correct post-test broken down by monster question
 ggplot(data = combinedPost_long,
@@ -394,10 +495,21 @@ ggplot(data = combinedPost_long,
   facet_grid(group~condition) +
   labs(x = "Question")
 
-# between age groups, within static
-ttestBF(formula = correct ~ group, data = subset(combinedPost_long, condition == "static")) # [1] Alt., r=0.707 : 12.57729 ±0%
+combinedPost_long
 
-starChains=posterior(ttestBF(formula = correct ~ group, data = subset(combinedPost_long, condition == "static")),iterations=1000)
+# Between age groups, within static
+
+# Bayesian t=test
+ttestBF(formula = correct ~ group, data = subset(combinedPost, condition == "static")) # [1] Alt., r=0.707 : 2.323582 ±0%
+
+t.test(formula = correct ~ group, data = subset(combinedPost, condition == "static")) # p = 0.001
+
+starChains=posterior(ttestBF(formula = correctProp ~ group, data = subset(combinedPost_long, condition == "static")),iterations=1000)
 quantile(starChains[,2],probs=c(0.025,0.975)) # mean difference CI -0.16824149 -0.03370975 
 mean(starChains[,4])# effect size estimate -0.3152009
+
+# Between age groups, within dynamic
+
+# Bayesian t=test
+ttestBF(formula = correct ~ group, data = subset(combinedPost, condition == "dynamic")) # [1] Alt., r=0.707 : 53.63763 ±0%
 

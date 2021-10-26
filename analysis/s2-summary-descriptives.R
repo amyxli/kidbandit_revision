@@ -326,7 +326,7 @@ adult_posttest<-adult_sum
 
 all_posttest<-rbind(child_posttest,adult_posttest)
 all_posttest<-as.data.frame(all_posttest)
-# write.csv(all_posttest,"study2_posttest_v2.csv")
+# write.csv(all_posttest, here("data_tidy", "study2_posttest_v2.csv"))
 
 adult_sum <- left_join(adult_sum, a_explore)
 adult_sum <- left_join(adult_sum, a_DiscoveryAll)

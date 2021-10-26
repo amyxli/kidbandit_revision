@@ -102,6 +102,7 @@ contingencyTableBF(dynamic,sampleType = "poisson")
 
 # mean prop overall correct in posttest
 aggregate(data = data_sum, correct~ condition + group, FUN = "mean") #* reported: paper*#
+
 # condition group   correct
 # 1   dynamic adult 0.7200000
 # 2    static adult 0.8444444
@@ -128,13 +129,7 @@ tmp <- subset(study1post_long, question != "8 stars" & group == "adult" & condit
   summarise(correctProp = mean(correct)) %>%
   ungroup() 
 
-tmp$correctProp %>% mean() # [1] 0.85
-
-# t-test for children vs. chance, by condition
-dataChild<- data_sum %>% filter(group == "child")
-
-ttestBF(subset(dataChild, condition=="dynamic")$correct, mu=.2) #*reported: paper*# 2.02 x 10^5
-ttestBF(subset(dataChild, condition=="static")$correct, mu=.2) # data constant since everyone got 100%
+tmp$correctProp %>% mean() # [1] 0.85 for adults in dynamic, w/o 8-star question
 
 ##################################
 #####      LINEAR MODELS      ####
@@ -142,8 +137,13 @@ ttestBF(subset(dataChild, condition=="static")$correct, mu=.2) # data constant s
 dataDynamic$group<-as.factor(dataDynamic$group)
 
 groupBF<-lmBF(correct_8~group, dataDynamic) #* reported: paper*# group : 4489.353 ±0%
+groupBF
+
 switchBF<-lmBF(correct_8~switch, dataDynamic)  # switch: 462526.5 ±0.01%
+switchBF
+
 exploreBF<-lmBF(correct_8~explore, dataDynamic) # explore : 221674.8 ±0.01%
+exploreBF
 
 switchgroupBF<-lmBF(correct_8~switch+group, dataDynamic)
 exploregroupBF<-lmBF(correct_8~explore+group, dataDynamic)

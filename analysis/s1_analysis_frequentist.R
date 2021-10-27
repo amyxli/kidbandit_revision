@@ -65,22 +65,15 @@ dataDynamic <- data_sum %>% filter(condition == "dynamic")
 dynamic <- xtabs( ~ correct_8 + group, dataDynamic ) 
 
 chisq.test(dynamic)
-# Chi-squared test X-squared = 9.1866, df = 1, p-value = 0.002438
+# X-squared = 13.575, df = 1, p-value = 0.0002293
 
 ###      Overall      ####
-
-# mean prop overall correct in posttest
-aggregate(data = data_sum, correct~ condition + group, FUN = "mean") #* reported: paper*#
-
-#  across both conditions, children only
-subset(data_sum, group == "child")$correct %>% mean() #* reported: paper*#
 
 # t-test for children vs. chance, by condition
 dataChild<- data_sum %>% filter(group == "child")
 
 t.test(subset(dataChild, condition=="dynamic")$correct, mu=.2) 
 #t = 10.267, df = 14, p-value = 6.733e-08, CI  0.7063037 0.9736963
-
 
 t.test(subset(dataChild, condition=="static")$correct, mu=.2) 
 # data constant since everyone got 100%
@@ -103,13 +96,13 @@ mod5<-glm(correct_8~explore+group, dataDynamic, family= "binomial")
 mod6<-glm(correct_8~switch+explore+group, dataDynamic, family= "binomial")
 
 # how much better is switch vs. group
-anova(mod1, mod2, test = "LRT") # LR = 11.071
+anova(mod1, mod2, test = "LRT") # LR = 19.587  
 # how much better is explore vs. group
-anova(mod1, mod3, test = "LRT") # LR = 10.126
+anova(mod1, mod3, test = "LRT") # LR = 14.551 
 
 # Comparing the child-only model to one that also includes switching
-anova(mod1, mod4, test = "LRT") #switch+group vs group-only.  0.000724 ***
-anova(mod1, mod5, test = "LRT") #explore+group vs group-only. 0.001183 **
+anova(mod1, mod4, test = "LRT") #switch+group vs group-only.  2.26e-06 ***
+anova(mod1, mod5, test = "LRT") #explore+group vs group-only. 0.0001135 ***
 
 # Check for relationship between age and exploration within children
 dataChild<- data_sum %>% filter(group == "child")

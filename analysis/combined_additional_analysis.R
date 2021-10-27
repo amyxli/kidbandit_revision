@@ -59,7 +59,6 @@ bestByBinFine<-aggregate(data = all_trials, best~binFine+subjID+group+condition,
 half<- 40 #How many trials per bin
 all_trials$half<-floor((all_trials$trial-1)/half)
             
-
 # Define other dfs needed later ####
 dynamicTrials<-all_trials[all_trials$condition=="dynamic",] # dynamic only
 
@@ -79,36 +78,11 @@ names(status.labs) <- c(0, 1)
 #------------------------------------#
 # visualisation of "best" choices ####
 #------------------------------------#
-
 # for both static and dynamic conditions, prop best by halves
-prop_best_all <-aggregate(data = all_trials, best~half+subjID+group+condition+status, FUN = "mean")
+all_trials$status[is.na(all_trials$status)] <- 0 # replace NA statuses with 0s, to make sure static condition is not dropped from below
+all_trials$time[is.na(all_trials$time)] <- 80 # replace NA time (i.e. trial on which change discovered ) with 80 (for 80 trials)
 
-# Plot frequency of people who chose best option in dynamic, trials 41-80
-prop_best_dyn<-aggregate(data = dynamicTrials, best~half+subjID+group+status, FUN = "mean") # dynamic only, both halves
-
-prop_best_dyn$half<-as.factor(prop_best_dyn$half)
-
-tmp <- subset(prop_best_dyn, half == 1) # data for dynamic, trials 41-80
-
-## density plot of frequencies at all values of prop best
-ggplot(tmp, 
-       aes(x=best, colour=group)) +
-  geom_density() 
-
-## however not possible to report count statistics since prop_best is continuous
-## so divide prop_best into 4 levels (prop_best_lvl)
-
-tmp <- tmp %>% mutate(prop_best_lvl = ifelse(best <= 0.2, 1,
-                                             ifelse(best > 0.2 & best <= 0.4, 2,
-                                                    ifelse(best > 0.4 & best <= 0.6, 3,
-                                                           ifelse(best > 0.6 & best <= 0.8, 4,
-                                                                  5)))))
-tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
-
-## now count how many adults vs kids in each bin
-tabyl(tmp, group, prop_best_lvl) # not conditionalised on discovery status
-
-tabyl(subset(tmp, status == 1), group, prop_best_lvl) # discovered only
+prop_best_all <- aggregate(data = all_trials, best~half+subjID+group+condition+status+time, FUN = "mean")
 
 # manuscript plot figure 2I: proportion of time choosing the best monster,
 # both static and dynamic, broken down by halves of experiment
@@ -265,8 +239,77 @@ lmBF(data= subset(adultSwitch, condition == "static"), switch~bin) # [1] bin : 1
 #                    Follow-up analyses to address reviewer comments                    ####
 #-----------------------------------------------------------------------------------------##
 
+## Did people who discovered the change exploit? ####
+
+### Looking at maximizing ("best") choices ####
+#### descriptives of "best" choices in the second half, after change ####
+# for both static and dynamic conditions, prop best by halves
+# Plot frequency of people who chose best option in dynamic, trials 41-80
+prop_best_dyn<-aggregate(data = dynamicTrials, best~half+subjID+group+status+time, FUN = "mean") # dynamic only, both halves
+
+prop_best_dyn$half<-as.factor(prop_best_dyn$half)
+
+tmp <- subset(prop_best_dyn, half == 1) # data for dynamic, trials 41-80
+
+## density plot of frequencies at all values of prop best
+ggplot(tmp, 
+       aes(x=best, colour=group)) +
+  geom_density() 
+
+## however not possible to report count statistics since prop_best is continuous
+## so divide prop_best into 4 levels (prop_best_lvl)
+
+tmp <- tmp %>% mutate(prop_best_lvl = ifelse(best <= 0.2, 1,
+                                             ifelse(best > 0.2 & best <= 0.4, 2,
+                                                    ifelse(best > 0.4 & best <= 0.6, 3,
+                                                           ifelse(best > 0.6 & best <= 0.8, 4,
+                                                                  5)))))
+tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
+
+## now count how many adults vs kids in each bin
+tabyl(tmp, group, prop_best_lvl) # not conditionalised on discovery status
+
+# group  1  2  3 4
+# adult 39  5 12 2
+# child 11 34  4 1
+
+tabyl(subset(tmp, status == 1), group, prop_best_lvl) # discovered only
+
+# group 1  2  3 4
+# adult 2  5 12 2
+
+# child 4 34  4 1
+
+#### descriptives of "best" choices after point of discovery ####
+
+# subset by only those who discovered <-  look at maximising behaviour after discovery
+tmp <- dynamicTrials %>% filter(status == 1) %>%
+  mutate(postDisc =
+           ifelse(trial > time, 1, 0))
+
+tmp$postDisc <- as.factor(tmp$postDisc)
+
+tmp <-aggregate(data = tmp, best~postDisc+subjID+group+condition+status+time, FUN = "mean")
+
+## however not possible to report count statistics since prop_best is continuous
+## so divide prop_best into 4 levels (prop_best_lvl)
+tmp <- subset(tmp, postDisc == 1) # data for dynamic, trials 41-80
+
+tmp <- tmp %>% mutate(prop_best_lvl = ifelse(best <= 0.2, 1,
+                                             ifelse(best > 0.2 & best <= 0.4, 2,
+                                                    ifelse(best > 0.4 & best <= 0.6, 3,
+                                                           ifelse(best > 0.6 & best <= 0.8, 4,
+                                                                  5)))))
+tmp$prop_best_lvl <- as.factor(tmp$prop_best_lvl)
+
+tabyl(tmp, group, prop_best_lvl) 
+
+# group 1  2 3  4 5
+# adult 0  1 1 11 8
+# child 1 34 5  3 0
+
 #--------------------------------------------------------------------------------------    -#
-## visualisation of exploration (non-max + switch as conditionalised on change discovery ####
+### Visualising exploration (non-max + switch as conditionalised on change discovery     ####
 #--------------------------------------------------------------------------------------    -#
 
 dynamicTrials  # dynamic condition data only, since that's condition where change happens
@@ -278,18 +321,6 @@ tmp <- dynamicTrials %>%
   group_by(subjID, half, group, status) %>%
   summarise(meanNonMax = mean(explore, na.rm = TRUE)) %>% # need na.rm = TRUE since 1st trial will have explore=NA
   ungroup()
-
-ggplot(
-  tmp,
-  aes(x = half, y = meanNonMax, fill=group)
-) +
-  geom_boxplot(alpha=.5) +
-  theme_bw() +
-  scale_fill_colorblind() +
-  ylab("Prop non-max") + 
-  xlab("Half") +
-  theme(legend.position="none") +
-  facet_grid(status~group)
 
 # non-maximising (explore) choices, grouped by status (did they discover 8-star?) and age group
 nonMax_StatusBin<-aggregate(data = dynamicTrials, explore~bin+subjID+group+status, FUN = "mean",na.rm=TRUE)
@@ -312,7 +343,7 @@ plt <-ggplot(data = nonMax_StatusBin, aes(x = bin, y = explore, group=bin, fill 
   ylab("Proportion of non-maximizing choices")+
   ylim(0,1)
 
-plt
+plt 
 
 # ggsave(here("plots", "propNonMax_byStatusBin.png"), width = 14.3, height = 7.46)
 
@@ -338,24 +369,16 @@ ggplot(data = switch_StatusBin, aes(x = bin, y = switch, group=bin, fill =group)
 
 # ggsave(here("plots", "switch_byStatusBin.png"), width = 14.3, height = 7.46)
 
+  
 #-----------------------------------------------------------#
-##                people's 1st 8-star trial ####
+###           6-star persisters in dynamic condition     ####
 #-----------------------------------------------------------#
 
-# out of people who discovered, what was their first 8-star trial?
-tmp <- dynamicTrials %>% 
-  dplyr::select(c(subjID, group, condition, status, time)) %>%
-  unique() %>%
-  filter(status == 1 & condition == "dynamic")
-  
-ggplot(tmp, aes(time, colour = group, fill = group)) +
-  geom_density(alpha = 0.1) +
-  labs(x = "trial discovered", y = "prop participants in group")
-
-ggplot(tmp) +
-  geom_freqpoly(aes(x = time, colour = group, fill = group),
-                 binwidth = 1)
-  
+tmp <- dynamicTrials  %>%
+  mutate(oldBest = ifelse(trial < 41 & earnedThis == 6, 1, # 1st half and picked 6-star
+                          ifelse(trial> 40 & earnedThis == 6, 1, # 2nd half and picked 6-star
+                                 0))) %>%
+  dplyr::select(subjID, condition, group, study, trial, status, time, earnedThis, bin, binFine, half, best, oldBest)
 
 # plot 6-star choices by halves
 
@@ -403,17 +426,6 @@ ggplot(data = oldBestBin, aes(x = half, y = oldBest, group=bin, fill =group))+
         axis.text.x = element_text(size=18))+
   ylab("Proportion of 6-star choices")+
   ylim(0,1)
-
-#-----------------------------------------------------------#
-##                  dynamic: 6-star persisters           ####
-#-----------------------------------------------------------#
-
-tmp <- dynamicTrials  %>%
-  mutate(oldBest = ifelse(trial < 41 & earnedThis == 6, 1, # 1st half and picked 6-star
-                          ifelse(trial> 40 & earnedThis == 6, 1, # 2nd half and picked 6-star
-                                 0))) %>%
-  dplyr::select(subjID, condition, group, study, trial, status, time, earnedThis, bin, binFine, half, best, oldBest)
-
 
 #--------------------------------------------------------------------#
 ##                  Post-test combined analysis                   ####
